@@ -6,12 +6,15 @@
 #include <fstream>
 #include <cmath>
 #include <time.h>
-#include <cstring>
+#include <string>
 #include <sstream>
-#include "nrutil2.h"
+#include "utils.h"
 
-using namespace std;
-using std::string;
+extern "C"{
+#include "nrutil.h"
+}
+
+
 
 // This is the basic class to contain the basic environment details
 // Notably, it contains the constants observed in solving the PDE
@@ -72,7 +75,7 @@ class MatrixT{
 	}
 
 	void deAllocateData(){
-		cout << "trying to delete" << endl;
+		std::cout << "trying to delete" << std::endl;
 		free_d3tensor(data,1,nx,1,ny,1,nz);
 	}
 
@@ -85,7 +88,7 @@ class MatrixT{
 					data[x][y][z] = 5*exp((-1.0)*pow((5.0*(double)x/nx)-2.5,2))
 								    *exp((-1.0)*pow((5.0*(double)y/ny)-2.5,2))
 								    *exp((-1.0)*pow((5.0*(double)z/nz)-2.5,2));
-					//cout << data[x][y][z] << " ";
+					//std::cout << data[x][y][z] << " ";
 				}
 			}
 		}
@@ -194,33 +197,33 @@ class MatrixT{
 				for ( int z = 1 ; z <= nz ; z++){
 					//Set intial gaussian temp
 					data[x][y][z] += func(x,y,z);
-					//cout << data[x][y][z] << " ";
+					//std::cout << data[x][y][z] << " ";
 				}
 			}
 		}
 		return;
 	}
 
-	void exportT(ofstream& myFile, int slice, int time) {
+	void exportT(std::ofstream& myFile, int slice, int time) {
 		int x = slice;
 		for ( int y = 0 ; y < ny ; y++) {
 			for ( int z = 0 ; z < nz ; z++){
 				// Export infomation from Temp Matrix for a give z=
-				myFile << time << ","<< data[x][y][z] << "," << x << "," << y << "," << z << endl;
-				//myFile << time << "\t"<< (*data)[x][y][z] << "\t" << x << "\t" << y << "\t" << z << endl;
+				myFile << time << ","<< data[x][y][z] << "," << x << "," << y << "," << z << std::endl;
+				//myFile << time << "\t"<< (*data)[x][y][z] << "\t" << x << "\t" << y << "\t" << z << std::endl;
 			}
 		}
 		return;
 	}
 	
 	//void printToFile(int p, int q, int r, double ***M) {
-	void printToFile(ofstream* f) {
+	void printToFile(std::ofstream* f) {
 		//int p = nx+1, q = ny+1, r = nz+1;
 		int p = nx, q = ny, r = nz;
 		int prod = p*q*r;
 		//int index = (int)nx/2;
 		
-		//cout << "prod is: " << prod << endl;
+		//std::cout << "prod is: " << prod << std::endl;
 				
 		
 		
@@ -230,11 +233,24 @@ class MatrixT{
 
 };
 
+class solver {
+public:
+    virtual void solve(double **A, double *x, double *b, int size, double error = 0.0001) = 0;
+};
+
 // Basic functions to perform a gaussian elimination
-class gausselim{
+class gausselim : public solver
+{
   public:
-	static void upper_triangulate(double **A, double *b, int m, int pivotFlag){
-	  //cout << "In upper triangular" << endl;
+      
+    void solve(double **A, double *x, double *b, int size, double error = 0.0001)
+    {
+        upper_triangulate(A,b,size);
+        back_sub(A,x,b,size);
+    }
+  private:
+    void upper_triangulate(double **A, double *b, int m, int pivotFlag = 1){
+	  //std::cout << "In upper triangular" << std::endl;
 	  
 	  int i,j,k;
 	  double scale;
@@ -244,7 +260,7 @@ class gausselim{
 			// set pivot index
 			i = j+1;
 			
-			//cout << "j is " << j << " and i is " << i << endl;
+			//std::cout << "j is " << j << " and i is " << i << std::endl;
 			
 			if (pivotFlag != 0 ){           // with pivoting
 				
@@ -309,7 +325,7 @@ class gausselim{
 		}
 	}
 
-	static void back_sub(double **A, double *x, double *b, int m){
+	void back_sub(double **A, double *x, double *b, int m){
 	  int i,j;
 	  x[m] = b[m]/A[m][m];
 
@@ -322,50 +338,6 @@ class gausselim{
 	  }
 	}
 	
-	static void mprint(double **matrix, int m, string label){
-		int i, j;
-		cout << label;
-
-		for (i = 1; i <= m; ++i){
-			for (j = 1; j <= m; ++j){
-				printf("%10.2f ", matrix[i][j]);
-			}
-			printf("\n");
-		}
-		printf("\n------------------------\n");
-	}
-	static void mprint(double **matrix, int m, string label,ofstream& file){
-		int i, j;
-		file << label;
-
-		for (i = 1; i <= m; ++i){
-			for (j = 1; j <= m; ++j){
-				file << " " << matrix[i][j];
-			}
-			file << endl;
-		}
-		file << "END MATRIX" << endl;	
-	}
-	static void vprint(double *vector, int m, string label){
-		int i;
-		cout << label;
-
-		for (i = 1; i <= m; ++i){
-			printf("%10.2f ", vector[i]);
-		}
-
-		printf("\n------------------------\n");
-	}
-	static void vprint(double *vector, int m, string label, ofstream& file) {
-		int i;
-		file << label;
-
-		for (i = 1; i <= m; ++i){
-			file << " " << vector[i];
-		}
-
-		file << "END VECTOR" << endl;
-	}
 };
 	
 class FTCS_Solver{
@@ -380,7 +352,7 @@ class FTCS_Solver{
 		*		  + C_z(forward and backward)
 		*/
 		
-		string probsize;
+		std::string probsize;
 
 		MatrixT* temp;
 		MatrixT* new_temp;
@@ -409,7 +381,7 @@ class FTCS_Solver{
 			dt = temp->dt;
 			
 			new_temp = new MatrixT(temp->nx,temp->ny,temp->nz);
-			cout << "declared new_temp" << endl;
+			std::cout << "declared new_temp" << std::endl;
 			
 			return;
 		}
@@ -417,13 +389,13 @@ class FTCS_Solver{
 		// iterate through
 		void solve_nextT() {		
 			
-			//cout << temp->data[temp->nx/2][temp->ny/2][temp->nz/2] << C_x << " " << C_y << " " << C_z << endl;
+			//std::cout << temp->data[temp->nx/2][temp->ny/2][temp->nz/2] << C_x << " " << C_y << " " << C_z << std::endl;
 			
 			for ( int x = 2 ; x < temp->nx ; x++){
 				for ( int y = 2 ; y < temp->ny ; y++){
 					for ( int z = 2 ; z < temp->nz ; z++){
 						
-						//cout << "in loop where x,y,z" << x << "," << y << "," << z << endl;    // use sparingly as it will cause putty to crash
+						//std::cout << "in loop where x,y,z" << x << "," << y << "," << z << std::endl;    // use sparingly as it will cause putty to crash
 						
 						new_temp->data[x][y][z] = temp->data[x][y][z] * ( 1 - 2*C_x - 2*C_y - 2*C_z )
 												 + C_x*(temp->data[x-1][y][z] + temp->data[x+1][y][z]) 
@@ -444,13 +416,13 @@ class FTCS_Solver{
 		
 		void solve_nextT( double (*func)(int,int,int)) {		
 			
-			//cout << temp->data[temp->nx/2][temp->ny/2][temp->nz/2] << C_x << " " << C_y << " " << C_z << endl;
+			//std::cout << temp->data[temp->nx/2][temp->ny/2][temp->nz/2] << C_x << " " << C_y << " " << C_z << std::endl;
 			
 			for ( int x = 2 ; x < temp->nx ; x++){
 				for ( int y = 2 ; y < temp->ny ; y++){
 					for ( int z = 2 ; z < temp->nz ; z++){
 						
-						//cout << "in loop where x,y,z" << x << "," << y << "," << z << endl;    // use sparingly as it will cause putty to crash
+						//std::cout << "in loop where x,y,z" << x << "," << y << "," << z << std::endl;    // use sparingly as it will cause putty to crash
 						
 						new_temp->data[x][y][z] = temp->data[x][y][z] * ( 1 - 2*C_x - 2*C_y - 2*C_z )
 												 + C_x*(temp->data[x-1][y][z] + temp->data[x+1][y][z]) 
@@ -471,13 +443,13 @@ class FTCS_Solver{
 				
 		void solve_nextT( int val) {		
 			
-			//cout << temp->data[temp->nx/2][temp->ny/2][temp->nz/2] << C_x << " " << C_y << " " << C_z << endl;
+			//std::cout << temp->data[temp->nx/2][temp->ny/2][temp->nz/2] << C_x << " " << C_y << " " << C_z << std::endl;
 			
 			for ( int x = 2 ; x < temp->nx ; x++){
 				for ( int y = 2 ; y < temp->ny ; y++){
 					for ( int z = 2 ; z < temp->nz ; z++){
 						
-						//cout << "in loop where x,y,z" << x << "," << y << "," << z << endl;    // use sparingly as it will cause putty to crash
+						//std::cout << "in loop where x,y,z" << x << "," << y << "," << z << std::endl;    // use sparingly as it will cause putty to crash
 						
 						new_temp->data[x][y][z] = temp->data[x][y][z] * ( 1 - 2*C_x - 2*C_y - 2*C_z )
 												 + C_x*(temp->data[x-1][y][z] + temp->data[x+1][y][z]) 
@@ -509,8 +481,8 @@ class FTCS_Solver{
 			// populate C's and other constants
 			setup();
 			
-			string filename = string("output_FTCS_") + probsize + string(".bin") ;
-			ofstream file(filename.c_str( ), ios::binary);
+			std::string filename = std::string("output_FTCS_") + probsize + std::string(".bin") ;
+			std::ofstream file(filename.c_str( ), std::ios::binary);
 									
 			int ctr = 0, ctr2 = 0;
 			
@@ -518,17 +490,16 @@ class FTCS_Solver{
 			//for ( long t = 0 ; t < 10 ; t++) {	
 				//calc next t
 				
-				
 				solve_nextT();
-				//cout << "after solveNextT" << endl;
+				//std::cout << "after solveNextT" << std::endl;
 				if ( ctr2++ == 250 ) {
-					//cout << "in loop where t equals " << t << " and count equals " << ctr++ << endl;
+					//std::cout << "in loop where t equals " << t << " and count equals " << ctr++ << std::endl;
 					temp->printToFile(&file);
 					ctr2=1;
 					ctr++;
 				}
 			}
-			cout << "Counter equals: " << ctr << endl;
+			std::cout << "Counter equals: " << ctr << std::endl;
 			
 			
 			
@@ -542,27 +513,27 @@ class FTCS_Solver{
 		// take a given T and export it to a file
 		// deprecated to use Export function of MatrixT class
 
-		void exportT(ofstream& myFile,int slice, int time) {
+		void exportT(std::ofstream& myFile,int slice, int time) {
 			temp->exportT(myFile,slice, time);
 		}
 		
 };
 
 void FTCS_Driver() {
-	cout << "Matrix Solver" << endl;
+	std::cout << "Matrix Solver" << std::endl;
 
 	int matsize[] = {10,20,30,40,50,60,70,80};
 	
-	ofstream outputfile;
+	std::ofstream outputfile;
 	outputfile.open ("FTCS_Benchmark.txt");
 	  
 	for ( int i = 0 ; i < 6 ; i++) {
 		MatrixT m1(matsize[i],matsize[i],matsize[i]);
-		cout << "Solving a system of size: " << matsize[i] << endl;
+		std::cout << "Solving a system of size: " << matsize[i] << std::endl;
 		FTCS_Solver ft1(&m1);
   		long long time = ft1.solve();
 		
-		outputfile << ft1.probsize << " : " << time << "secs" << endl;
+		outputfile << ft1.probsize << " : " << time << "secs" << std::endl;
 	}
 
 	outputfile.close();
@@ -599,7 +570,7 @@ class Crank_Solver{
 		*						)						
 		*
 		*/
-		string probsize; 
+		std::string probsize; 
 		
 		double **A, **A_stor, *b, *x;
 
@@ -615,6 +586,8 @@ class Crank_Solver{
 		
 	  	MatrixT* temp;
 		MatrixT* b_mat;
+
+        solver *s;
 		
 		Crank_Solver(MatrixT* input){
 			n = (long)(input->nx) *(input->ny) *(input->nz); 
@@ -695,7 +668,11 @@ class Crank_Solver{
 			
 			return;
 		}
-		
+	
+        void setSolver(solver *solver)
+        {
+            s = solver;
+        }
 		
 		// Reset's the A matrix after a series of Gaussian Eliminations
 		void resetA(){
@@ -720,8 +697,8 @@ class Crank_Solver{
 			// probsize = out.str();
 						
 			
-			// string filename = string("output_CN_") + probsize + string(".bin") ;
-			// ofstream file(filename.c_str( ), ios::binary);
+			// string filename = std::string("output_CN_") + probsize + std::string(".bin") ;
+			// std::ofstream file(filename.c_str( ), std::ios::binary);
 									
 			int ctr = 0, ctr2 = 0;
 			
@@ -731,9 +708,9 @@ class Crank_Solver{
 			
 			for ( long t = 1 ; t <= nsteps ; t++) {
 				//calc next T 
-				cout << "before calc new T" << endl;
+				std::cout << "before calc new T" << std::endl;
 				calcNextT();
-				cout << "after calc new T" << endl;
+				std::cout << "after calc new T" << std::endl;
 				
 				
 				if ( ctr2++ == exportint ) {
@@ -744,7 +721,7 @@ class Crank_Solver{
 				
 			}
 			
-			cout << "Number of Matrices Exported: " << ctr << endl;
+			std::cout << "Number of Matrices Exported: " << ctr << std::endl;
 			
 			//file.close();
 			
@@ -760,51 +737,36 @@ class Crank_Solver{
 			///* Code to store b vector in file
 			std::stringstream out;  
 			out << b_t++;
-			string t_string = out.str();
+			std::string t_string = out.str();
 			
-			string bfilename = string("bfile_")+t_string+string(".txt");
-			ofstream bfile(bfilename.c_str( ), ios::binary); 
-			//*/
+			std::string bfilename = std::string("bfile_")+t_string+std::string(".txt");
+			std::ofstream bfile(bfilename.c_str( ), std::ios::binary); 
 			
 			// recalculate b
-			
 			double C_xyz = (C_x+C_y+C_z)/3;     // simplified average of C_x,y,z
 			for ( int x = 1 ; x <= nx ; x++){
 				for ( int y = 1 ; y <= ny ; y++){
 					for ( int z = 1 ; z <= nz ; z++){
 												
 						b_mat->data[x][y][z] = temp->data[x][y][z] + (1/2)*(bhelper(x,y,z)-6*C_xyz*temp->data[x][y][z]);		 
-						
-						//bfile << x << " " << y << " " << z << endl;
-						//bfile << b_mat->data[x][y][z] <<  endl;
+						//bfile << x << " " << y << " " << z << std::endl;
+						//bfile << b_mat->data[x][y][z] <<  std::endl;
 					}
 				}
 			}
 			
 			b =  &(b_mat->data[1][1][1]);
 			
-			gausselim::vprint(b,n,"b vector",bfile);
-			gausselim::mprint(A,n,"A matrix",bfile);
-			
+			vprint(b,n,"b vector",bfile);
+			mprint(A,n,"A matrix",bfile);
 						
 			x =  &(temp->data[1][1][1]);
 			
-			int flag = 1;                         // 1 for pivoting
+			vprint(x,n,"x vector before",bfile);
+
+			std::cout << "About to upper tri" << std::endl;
 			
-			gausselim::vprint(x,n,"x vector before",bfile);
-			
-			
-			cout << "About to upper tri" << endl;
-			
-			gausselim::upper_triangulate(A,b,n,flag);
-			
-			gausselim::mprint(A,n,"A matrix after",bfile);
-			gausselim::vprint(x,n,"x vector before back",bfile);
-			cout << "About to back sub" << endl;
-			
-			gausselim::back_sub(A,x,b,n);
-			
-			gausselim::vprint(x,n,"x vector",bfile);
+            s->solve(A,x,b,n);
 			
 			bfile.close();
 			
@@ -814,7 +776,7 @@ class Crank_Solver{
 			
 		}
 				
-		void exportT( ofstream& myFile,int slice, int time) {
+		void exportT( std::ofstream& myFile,int slice, int time) {
 			temp->exportT(myFile,slice, time);
 			return;
 		} 
@@ -834,26 +796,31 @@ class Crank_Solver{
 };
 
 void CN_Driver() {
-	cout << "Matrix Solver" << endl;
+	std::cout << "Matrix Solver" << std::endl;
 
 	int matsize[] = {5,10,20,30,40,50};
 	
-	ofstream outputfile;
+	std::ofstream outputfile;
 	outputfile.open ("CN_Benchmark.txt");
-	  
+	 
+    gausselim *g = new gausselim();
 	  
 	for ( int i = 0 ; i < 2 ; i++) {
-		cout << "About to declare a MatrixT of size: " << matsize[i] << endl;
+		std::cout << "About to declare a MatrixT of size: " << matsize[i] << std::endl;
 		MatrixT m1(matsize[i],matsize[i],matsize[i]);
-		cout << "Solving a system of size: " << matsize[i] << endl;
+		std::cout << "Solving a system of size: " << matsize[i] << std::endl;
 		Crank_Solver ft1(&m1);
-		cout << "After declaring Crank " << endl;
+        ft1.setSolver(g);
+		std::cout << "After declaring Crank " << std::endl;
   		long long time = ft1.solve(1,1);
-		cout << "After solve" << endl;
-		outputfile << ft1.probsize << " : " << time << "secs" << endl;
+		std::cout << "After solve" << std::endl;
+		outputfile << ft1.probsize << " : " << time << "secs" << std::endl;
 	}
 	outputfile.close();
-	return;
+	
+    delete g;
+    
+    return;
 }
 
 int main ()

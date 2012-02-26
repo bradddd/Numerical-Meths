@@ -1,6 +1,10 @@
 #ifndef _NR_UTILS_H_
 #define _NR_UTILS_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
 static float sqrarg;
 #define SQR(a) ((sqrarg=(a)) == 0.0 ? 0.0 : sqrarg*sqrarg)
@@ -110,5 +114,9 @@ void free_d3tensor();
 void free_d4tensor();
 
 #endif /* ANSI */
+
+#ifdef __cplusplus
+} 
+#endif
 
 #endif /* _NR_UTILS_H_ */
