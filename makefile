@@ -26,7 +26,7 @@ LFLAGS =
 LIBS = 
 
 # define the C source files
-SRCS = ./lib/nrutil.c Code.cpp 
+SRCS = Code.cpp ./lib/nrutil.c 
 
 # define the C object files 
 #
@@ -63,7 +63,7 @@ $(MAIN): $(OBJS)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
 clean:
-	$(RM) *.o *~ ./lib/*.o $(MAIN)
+	$(RM) *.o *~ $(MAIN)
 
 depend: $(SRCS)
 	makedepend $(INCLUDES) $^

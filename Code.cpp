@@ -812,7 +812,7 @@ void CN_Driver() {
 		Crank_Solver ft1(&m1);
         ft1.setSolver(g);
 		std::cout << "After declaring Crank " << std::endl;
-  		long long time = ft1.solve(1,1);
+  		long long time = ft1.solve(10,1);
 		std::cout << "After solve" << std::endl;
 		outputfile << ft1.probsize << " : " << time << "secs" << std::endl;
 	}
