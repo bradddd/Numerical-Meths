@@ -33,7 +33,14 @@ class gauss_seidel : public solver
 public: 
     
     virtual void solve(double **A, double *x, double *b, int size, double error = 0.0001);
-}; 
+};
+
+class sor : public solver
+{
+public: 
+    
+    virtual void solve(double **A, double *x, double *b, int size, double error = 0.0001);
+};
 
 
 // Basic functions to perform a gaussian elimination

@@ -639,11 +639,11 @@ class Crank_Solver{
 			
 			// recalculate b
 			double C_xyz = (C_x+C_y+C_z)/3;     // simplified average of C_x,y,z
-			for ( int x = 1 ; x <= nx ; x++){
-				for ( int y = 1 ; y <= ny ; y++){
-					for ( int z = 1 ; z <= nz ; z++){
+			for ( int _x = 1 ; _x <= nx ; _x++){
+				for ( int _y = 1 ; _y <= ny ; _y++){
+					for ( int _z = 1 ; _z <= nz ; _z++){
 												
-						b_mat->data[x][y][z] = temp->data[x][y][z] + (1/2)*(bhelper(x,y,z)-6*C_xyz*temp->data[x][y][z]);		 
+						b_mat->data[_x][_y][_z] = temp->data[_x][_y][_z] + (1/2)*(bhelper(_x,_y,_z)-6*C_xyz*temp->data[_x][_y][_z]);		 
 						//bfile << x << " " << y << " " << z << std::endl;
 						//bfile << b_mat->data[x][y][z] <<  std::endl;
 					}

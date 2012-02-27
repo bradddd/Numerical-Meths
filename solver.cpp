@@ -50,7 +50,7 @@ void jacobi::solve(double **A, double *x, double *b, int size, double error)
         }
 
         //printf("Iteration #%d of jacobi\n", iterations - max_iterations); 
-        vprint(x,size,"x");
+        //vprint(x,size,"x");
         /*double error = 0.0;
           if (error <= threshold)
           break;
@@ -63,10 +63,14 @@ void gauss_seidel::solve(double **A, double *x, double *b, int size, double erro
 {
     double sigma = 0.0;
     int max_iterations = 100;
+    double *x_old = dvector(1,size);
 
     // start with a guess at 0
-    for (int l = 0; l < size; l++)
-        x[l] = 0;
+    for (int i = 1; i <= size; i++)
+    {
+        x[i] = 0.0;
+        x_old[i] = 0.0;
+    }
 
     // iterate until solution converges or we hit max_iterations
     while(max_iterations--)
@@ -75,12 +79,9 @@ void gauss_seidel::solve(double **A, double *x, double *b, int size, double erro
         for(int i = 1; i <= size; i++)
         {
             sigma = b[i];
-            for(int j = 1; j <= size; j++)
+            for(int j = 1; j <= i - 1; j++)
             {
-                if( i != j )
-                {
-                    sigma = sigma - (A[i][j] * x[j]);
-                }
+                sigma = sigma + (A[i][j] * x[j]);
             }
             x[i] = sigma/A[i][i];
         }
@@ -91,6 +92,45 @@ void gauss_seidel::solve(double **A, double *x, double *b, int size, double erro
     }
 }
 
+
+void sor::solve(double **A, double *x, double *b, int size, double error)
+{
+    double omega = 1.0;
+    double sigma = 0.0;
+    int max_iterations = 100;
+    double *x_old = dvector(1,size);
+
+    // start with a guess at 0
+    for (int i = 1; i <= size; i++)
+    {
+        x[i] = 0.0;
+        x_old[i] = 0.0;
+    }
+
+    // iterate until solution converges or we hit max_iterations
+    while(max_iterations--)
+    {
+        // go thru the rows
+        for(int i = 1; i <= size; i++)
+        {
+            for(int j = i - 1; j <= size; j++)
+            {
+                sigma = sigma + (A[i][j] * x[j]);
+            }
+
+            for(int j = i + 1; j <= size; j++)
+            {
+                sigma = sigma + (A[i][j] * x_old[j]);
+            }
+
+            x[i] = x_old[i] + omega * (((b[i] - sigma) / A[i][i]) - x_old[i]);
+        }
+
+        //double error = 0.0;
+        //if (error <= threshold)
+        //    break;
+    }
+}
 
 
 // Basic functions to perform a gaussian elimination
