@@ -501,7 +501,7 @@ class Crank_Discretization{
 	  	MatrixT* temp;
 		MatrixT* b_mat;
 
-        solver *s;
+      solver *s;
 		
 		Crank_Discretization(MatrixT* input){
 			// calculate the size of the 2D matrix used to 
@@ -541,7 +541,10 @@ class Crank_Discretization{
 			b_mat = new MatrixT(temp->nx,temp->ny,temp->nz);
 			
 			//initialize A
+			
+			std::cout << "before initialize A" << std::endl;
 			initializeA();
+			std::cout << "after initialize A" << std::endl;
 			return;
 		}
 		
@@ -552,7 +555,11 @@ class Crank_Discretization{
 			// zero where A points to
 			memset(&A[1][1],0,n*n*sizeof(double));
 			
+			std::cout << "After memset to zero" << std::endl;
 			// iterate through each row
+			int count = 1;
+			int numThousands = 1;
+
 			for ( int i = 1; i < n ; i++) {
 				
 				C1=i-nx*ny;
@@ -563,9 +570,16 @@ class Crank_Discretization{
 				C6=i+nx;
 				C7=i+nx*ny;
 
+
+				// Debug
+				if ( count++ == 5000) {
+					std::cout << "Set " << ((numThousands++)*5000) << " rows of C in A" << std::endl;
+					count=0;
+				}
+
+
 				// This block is a set of conditionals to determine
 				// if each constant should be set in a give row
-								
 				// main case
 				if ( i > nx*ny && i < (n-nx*ny)) {
 					//set all
@@ -587,9 +601,13 @@ class Crank_Discretization{
 					if(C7>0 && C7<n) A[i][C7] = -1.0*C_z/2;
 				}	
 			}
+
+			std::cout << "After setting C's" << std::endl;  // debug
 			
 			// Copy values of A into another matrix to store
 			memcpy( &A_stor[1][1] , &A[1][1], n*n*sizeof(double));
+			
+			std::cout << "After setting additional A for storage" << std::endl;   // debug
 			
 			return;
 		}
@@ -619,7 +637,7 @@ class Crank_Discretization{
 			int ctr = 0, ctr2 = 0;
 			
 			if (benchmark){
-				for ( long t = 0 ; t <= nsteps; t++) {
+				for ( long t = 1 ; t <= nsteps; t++) {
 					calcNextT(benchmark);
 				}
 			}
@@ -635,7 +653,7 @@ class Crank_Discretization{
 				std::string filename = std::string("output_CN_") + probsize + std::string(".bin");
 				std::ofstream file(filename.c_str( ), std::ios::binary);
 			
-				for ( long t = 0 ; t <= nsteps; t++) {
+				for ( long t = 1 ; t <= nsteps; t++) {
 				   //calc next t
 					calcNextT(benchmark);
 					
@@ -723,7 +741,7 @@ class Crank_Discretization{
 				
 				vprint(x,n,"x vector before",bfile);
 
-				std::cout << "About to upper tri" << std::endl;
+				std::cout << "About to solve" << std::endl;
 				
 				// solve using the specific solver
 				s->solve(A,x,b,n);
@@ -754,6 +772,16 @@ class Crank_Discretization{
 			if ((z-1)>=1 )  val += C_z*(temp->data[x][y][z-1]);	
 			return val;
 		}
+
+		void deAllocateData() {
+			free_dmatrix(A,1,n,1,n);
+			free_dmatrix(A_stor,1,n,1,n);
+			free_dvector(b,1,n);
+			
+			temp->deAllocateData();
+			b_mat->deAllocateData();
+			return;			
+		}
 };
 
 void CN_Driver() {
@@ -767,16 +795,17 @@ void CN_Driver() {
     gausselim *g = new gausselim();
     jacobi *j = new jacobi();
 	  
-	for ( int i = 0 ; i < 2 ; i++) {
+	for ( int i = 3 ; i <= 3; i++) {
 		std::cout << "About to declare a MatrixT of size: " << matsize[i] << std::endl;
 		MatrixT m1(matsize[i],matsize[i],matsize[i]);
 		std::cout << "Solving a system of size: " << matsize[i] << std::endl;
 		Crank_Discretization ft1(&m1);
-        ft1.setSolver(j);
-		std::cout << "After declaring Crank " << std::endl;
-  		long long time = ft1.solve(10,1,false);
+      ft1.setSolver(j);
+		std::cout << "After Crank constructor, about to solve" << std::endl;
+  		long long time = ft1.solve(10,1,true);
 		std::cout << "After solve" << std::endl;
 		outputfile << ft1.probsize << " : " << time << "secs" << std::endl;
+		ft1.deAllocateData();
 	}
 	outputfile.close();
 	
@@ -785,6 +814,7 @@ void CN_Driver() {
     
     return;
 }
+
 
 int main ()
 {
