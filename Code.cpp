@@ -80,16 +80,17 @@ class MatrixT{
 		free_d3tensor(data,1,nx,1,ny,1,nz);
 	}
 
+	// This function initializes the data member
+	// to a 3d gaussian dist scaled accordingly
 	void InitializeGauss(){
 					
 		for ( int x = 1 ; x <= nx ; x++){
 			for ( int y = 1 ; y <= ny ; y++){
 				for ( int z = 1 ; z <= nz ; z++){
-					//Set intial gaussian temp
+					//Set intial gaussian temp for each x,y,z point
 					data[x][y][z] = 5*exp((-1.0)*pow((5.0*(double)x/nx)-2.5,2))
 								    *exp((-1.0)*pow((5.0*(double)y/ny)-2.5,2))
 								    *exp((-1.0)*pow((5.0*(double)z/nz)-2.5,2));
-					//std::cout << data[x][y][z] << " ";
 				}
 			}
 		}
@@ -133,6 +134,7 @@ class MatrixT{
 	}
 	
 	//Set BoundaryConditions be the same
+	// Doesn't appear to be properly implemented
 	void PeriodicCondition(){
 				
 		for ( int x = 1 ; x <= nx ; x++){
@@ -166,24 +168,31 @@ class MatrixT{
 	}
 	
 	// To incorporate constant conditions
+	// This function augments the values of each point
+	// in the data member by a double amount determined
+	// by the function passed in by pointer
 	void DirchletCondition(double (*func)(int,int,int)){
 		for ( int x = 1 ; x <= nx ; x++){
 			for ( int y = 1 ; y <= ny ; y++){
 				for ( int z = 1 ; z <= nz ; z++){
-					//Set intial gaussian temp
+				   // augments the value at data[x][y][z]
+					// by the value returned by the function
+					// passed in by pointer
 					data[x][y][z] += func(x,y,z);
-					//std::cout << data[x][y][z] << " ";
 				}
 			}
 		}
 		return;
 	}
 
+	// This function exports a "slice" (aka z height level)
+	// from the data member and exports it to a file stream
 	void exportT(std::ofstream& myFile, int slice, int time) {
 		int x = slice;
 		for ( int y = 0 ; y < ny ; y++) {
 			for ( int z = 0 ; z < nz ; z++){
 				// Export infomation from Temp Matrix for a give z=
+				// 1 line of code for "csv" 2nd line for "tab-delimited"
 				myFile << time << ","<< data[x][y][z] << "," << x << "," << y << "," << z << std::endl;
 				//myFile << time << "\t"<< (*data)[x][y][z] << "\t" << x << "\t" << y << "\t" << z << std::endl;
 			}
@@ -208,8 +217,11 @@ class MatrixT{
 
 };
 
-	
-class FTCS_Solver{
+
+
+// This class contains the basic functionality and setup
+// invloved for an FTCS discretization in 3 dimensions	
+class FTCS_Discretization{
 	public:
 	
 		/*
@@ -230,7 +242,7 @@ class FTCS_Solver{
 		double dx,dy,dz;
 		double C_x,C_y,C_z;
 						
-		FTCS_Solver(MatrixT* input) {
+		FTCS_Discretization(MatrixT* input) {
 									
 			temp = input;
 			return;
@@ -238,19 +250,25 @@ class FTCS_Solver{
 		
 		// no real setup like Crank, just manage overhead for exporting
 		void setup(){
+		   // calculates d's
 			dx=temp->l_x/temp->nx;
 			dy=temp->l_y/temp->ny;
 			dz=temp->l_z/temp->nz;
 
+			// calculates C's
 			C_x = temp->alpha*temp->dt/(dx*dx);
 			C_y = temp->alpha*temp->dt/(dy*dy);
 			C_z = temp->alpha*temp->dt/(dz*dz);
 			
+			// sets alpha and dt
 			alpha = temp->alpha;
 			dt = temp->dt;
-			
+
+			// allocates a new MatrixT the same size as the input
+			// and sets the new_temp ptr to it
 			new_temp = new MatrixT(temp->nx,temp->ny,temp->nz);
-			std::cout << "declared new_temp" << std::endl;
+			
+			//std::cout << "declared new_temp" << std::endl; // used to mark where in code
 			
 			return;
 		}
@@ -258,7 +276,7 @@ class FTCS_Solver{
 		// iterate through
 		void solve_nextT() {		
 			
-			//std::cout << temp->data[temp->nx/2][temp->ny/2][temp->nz/2] << C_x << " " << C_y << " " << C_z << std::endl;
+			//std::cout << temp->data[temp->nx/2][temp->ny/2][temp->nz/2] << C_x << " " << C_y << " " << C_z << std::endl; // output what each C is for debugging
 			
 			for ( int x = 2 ; x < temp->nx ; x++){
 				for ( int y = 2 ; y < temp->ny ; y++){
@@ -337,43 +355,60 @@ class FTCS_Solver{
 			return;			
 		}
 		
-		
-		double solve(){
+	
+
+		// the method to solve the system
+		// returns a double equal to the number of seconds
+		// it took the block to execute
+		//
+		// call with "true" to disable file output
+		//
+		// nsteps = number of "rounds" of solving to run
+		// exportint = the interval to output a matrix to file
+		// benchmark = bool to disable extraneous features
+		double solve(int nsteps, int exportint, bool benchmark){
 			time_t begin, end; 
 			time(&begin);
-			
-			std::stringstream out;
-			
-			out << temp->nx << "x" << temp->ny << "x" << temp->nz ;
-			probsize = out.str();
-			
+
 			// populate C's and other constants
 			setup();
 			
-			std::string filename = std::string("output_FTCS_") + probsize + std::string(".bin") ;
-			std::ofstream file(filename.c_str( ), std::ios::binary);
-									
+			if (!benchmark){
+		   	//generate probsize string for filename
+				std::stringstream out;
+				out << temp->nx << "x" << temp->ny << "x" << temp->nz ;
+				probsize = out.str();
+				
+				// This outputs the binary file containing matrices at given export intervals
+				// as dictated by the input paramters
+				// The file also relies upon the probsize string to help create a unique filename
+				std::string filename = std::string("output_FTCS_") + probsize + std::string(".bin") ;
+				std::ofstream file(filename.c_str( ), std::ios::binary);
+			}
+
 			int ctr = 0, ctr2 = 0;
 			
-			for ( long t = 0 ; t <= 10000 ; t++) {
-			//for ( long t = 0 ; t < 10 ; t++) {	
-				//calc next t
-				
+			for ( long t = 0 ; t <= nsteps; t++) {
+			
+			   //calc next t
 				solve_nextT();
+				
 				//std::cout << "after solveNextT" << std::endl;
-				if ( ctr2++ == 250 ) {
+				
+				if ( ctr2++ == exportint) {
 					//std::cout << "in loop where t equals " << t << " and count equals " << ctr++ << std::endl;
 					temp->printToFile(&file);
 					ctr2=1;
 					ctr++;
 				}
 			}
-			std::cout << "Counter equals: " << ctr << std::endl;
 			
+			// this is helpful to know how many matrices to read into matlab
+			std::cout << "Number of matrices exported: " << ctr << std::endl;
 			
-			
+			// will want to remove for benchmarking runs
 			file.close();
-			
+		
 			time(&end);
 			return difftime(end, begin);
 			
@@ -388,6 +423,10 @@ class FTCS_Solver{
 		
 };
 
+// This class is a driver used to benchmark runs
+// using FTCS discretizations instantiated via
+// the FTCS_Discretization class
+
 void FTCS_Driver() {
 	std::cout << "Matrix Solver" << std::endl;
 
@@ -399,7 +438,7 @@ void FTCS_Driver() {
 	for ( int i = 0 ; i < 6 ; i++) {
 		MatrixT m1(matsize[i],matsize[i],matsize[i]);
 		std::cout << "Solving a system of size: " << matsize[i] << std::endl;
-		FTCS_Solver ft1(&m1);
+		FTCS_Discretization ft1(&m1);
   		long long time = ft1.solve();
 		
 		outputfile << ft1.probsize << " : " << time << "secs" << std::endl;
@@ -409,7 +448,10 @@ void FTCS_Driver() {
 	return;
 }
 
-class Crank_Solver{
+
+// This class contains the basic functionality and setup
+// invloved for Crank-Nicholson discretization in 3 dimensions
+class Crank_Discretization{
 	public:
 		/*
 		* General Solution for FTCS
@@ -458,8 +500,9 @@ class Crank_Solver{
 
         solver *s;
 		
-		Crank_Solver(MatrixT* input){
+		Crank_Discretization(MatrixT* input){
 			n = (long)(input->nx) *(input->ny) *(input->nz); 
+			// allocate the matrices involved
 			A      = dmatrix(1,n,1,n);
 			A_stor = dmatrix(1,n,1,n);
 			b      = dvector(1,n);
@@ -472,7 +515,7 @@ class Crank_Solver{
 			return;
 		}	
 		
-		// no real setup like Crank, just manage overhead for exporting
+		// set up the constants and at the end initialize A
 		void setup(){
 		
 			nx=temp->nx; ny=temp->ny; nz=temp->nz;
@@ -486,6 +529,8 @@ class Crank_Solver{
 			alpha = temp->alpha;
 			dt = temp->dt;
 			
+			// allocates a new matrix B that will also be accessed
+			// as a column vector
 			b_mat = new MatrixT(temp->nx,temp->ny,temp->nz);
 			
 			//initialize A
@@ -679,7 +724,7 @@ void CN_Driver() {
 		std::cout << "About to declare a MatrixT of size: " << matsize[i] << std::endl;
 		MatrixT m1(matsize[i],matsize[i],matsize[i]);
 		std::cout << "Solving a system of size: " << matsize[i] << std::endl;
-		Crank_Solver ft1(&m1);
+		Crank_Discretization ft1(&m1);
         ft1.setSolver(j);
 		std::cout << "After declaring Crank " << std::endl;
   		long long time = ft1.solve(10,1);
