@@ -26,7 +26,7 @@ LFLAGS =
 LIBS = 
 
 # define the C source files
-SRCS = Code.cpp ./lib/nrutil.c 
+SRCS = solver.cpp Code.cpp ./lib/nrutil.c 
 
 # define the C object files 
 #

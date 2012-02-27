@@ -1,3 +1,5 @@
+#ifndef UTILS_H 
+#define UTILS_H
 
 #include <fstream>
 #include <iostream>
@@ -55,3 +57,4 @@ inline void vprint(double *vector, int m, std::string label, stream& file) {
     file << "END VECTOR" << std::endl;
 }
 
+#endif  // UTILS_H
