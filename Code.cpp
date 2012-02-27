@@ -99,35 +99,9 @@ class MatrixT{
 		
 	//Set BoundaryCondition To Zeros
 	void BoundaryCondition(){
-		/*
-		// for ( int x = 0 ; x <= nx ; x++){
-			// for ( int y = 0 ; y <= ny ; y++){
-				// data[x][y][0] = 0;
-				// data[x][y][0] = 0;
-				// data[x][y][nz] = 0;
-				// data[x][y][nz] = 0;
-			// }
-		// }
-		
-		// for ( int x = 0 ; x <= nx ; x++){
-			// for ( int z = 0 ; z <= nz ; z++){
-				// data[x][0][z] = 0;
-				// data[x][0][z] = 0;
-				// data[x][ny][z] = 0;
-				// data[x][ny][z] = 0;
-			// }
-		// }
-		
-		// for ( int z = 0 ; z <= nz ; z++){
-			// for ( int y = 0 ; y <= ny ; y++){
-				// data[0][y][z] = 0;
-				// data[0][y][z] = 0;
-				// data[nx][y][z] = 0;
-				// data[nx][y][z] = 0;
-			// }
-		// }
-		*/
-		
+	
+		// iterate through all of the edges of the 3d region
+		// and set them equal to zero
 		for ( int x = 1 ; x <= nx ; x++){
 			for ( int y = 1 ; y <= ny ; y++){
 				data[x][y][1] = 0;
