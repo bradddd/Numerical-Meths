@@ -26,7 +26,9 @@ LFLAGS =
 LIBS = 
 
 # define the C source files
-SRCS = solver.cpp Code.cpp ./lib/nrutil.c 
+SRCS = solver.cpp Code.cpp ./lib/nrutil.c
+TESTSRCS = solver.cpp ./lib/nrutil.c solver_tests.cpp
+
 
 # define the C object files 
 #
@@ -37,9 +39,12 @@ SRCS = solver.cpp Code.cpp ./lib/nrutil.c
 # with the .o suffix
 #
 OBJS = $(SRCS:.c=.o)
+TESTOBJS = $(TESTSRCS:.c=.o)
 
 # define the executable file 
 MAIN = code
+
+TEST = solver_tests 
 
 #
 # The following part of the makefile is generic; it can be used to 
@@ -52,8 +57,17 @@ MAIN = code
 all:    $(MAIN)
 	@echo  Done building $(MAIN)
 
+test: 	$(TEST)
+	@echo Done building $(TEST)
+
 $(MAIN): $(OBJS) 
 	$(CC) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(OBJS) $(LFLAGS) $(LIBS)
+
+
+$(TEST): $(TESTOBJS) 
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(TEST) $(TESTOBJS) $(LFLAGS) $(LIBS)
+
+
 
 # this is a suffix replacement rule for building .o's from .c's
 # it uses automatic variables $<: the name of the prerequisite of

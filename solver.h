@@ -5,9 +5,6 @@
  * Solvers for linear systems 
  *
  */
-#include <math.h>
-#include "nrutil.h"
-#include "utils.h"
 
 
 /*
@@ -48,7 +45,7 @@ class gausselim : public solver
 {
   public:
       
-    void solve(double **A, double *x, double *b, int size, double error = 0.0001);
+    virtual void solve(double **A, double *x, double *b, int size, double error = 0.0001);
   private:
     void upper_triangulate(double **A, double *b, int m, int pivotFlag = 1);
     void back_sub(double **A, double *x, double *b, int m);

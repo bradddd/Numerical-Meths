@@ -10,7 +10,9 @@
 
 void jacobi::solve(double **A, double *x, double *b, int size, double error)
 {
-    int max_iterations = 1;
+    int max_iterations = 1000;
+    double err = 0.0000000000001;
+    int iterations = 0;
 
     double sigma = 0.0;
     double *x_old = dvector(1,size);
@@ -38,16 +40,36 @@ void jacobi::solve(double **A, double *x, double *b, int size, double error)
             }
             
             if (A[i][i] == 0)
-                std::cout << "A[i][i] is zero..." << std::endl;
+            {
+                //std::cout << "A[i][i] is zero at index " << i << " skipping update of x[" <<i<<"]"<< std::endl;
+                continue;
+            }
 
             x[i] = (b[i] - sigma) / A[i][i];
         }
 
-        // setup the next iteration
-        for (int i = 1; i <= size; i++)
+        // check convergence
+        double tol = 0.0;
+        for (int k = 1; k <= size; k++)
         {
-            x_old[i] = x[i];
+            tol = tol + fabs(x[k] - x_old[k]);
         }
+        tol /= size;
+
+        if (tol <= err)
+        {
+            std::cout << "Solution converged in iteration " << iterations << std::endl;
+            std::cout << "mean(fabs(x - x_old)) = " << tol << " error threshold = " << err << std::endl;
+            break;
+        }
+
+        // setup the next iteration
+        for (int k = 1; k <= size; k++)
+        {
+            x_old[k] = x[k];
+        }
+
+        iterations++;
 
         //printf("Iteration #%d of jacobi\n", iterations - max_iterations); 
         //vprint(x,size,"x");
