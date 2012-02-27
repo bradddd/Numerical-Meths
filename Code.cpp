@@ -774,7 +774,7 @@ void CN_Driver() {
 		Crank_Discretization ft1(&m1);
         ft1.setSolver(j);
 		std::cout << "After declaring Crank " << std::endl;
-  		long long time = ft1.solve(10,1,true);
+  		long long time = ft1.solve(10,1,false);
 		std::cout << "After solve" << std::endl;
 		outputfile << ft1.probsize << " : " << time << "secs" << std::endl;
 	}

@@ -1,2 +1,2 @@
- : 0secs
- : 1secs
+5x5x5 : 0secs
+10x10x10 : 14secs
