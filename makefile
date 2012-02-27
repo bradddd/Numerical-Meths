@@ -78,19 +78,3 @@ Code.o: /usr/include/sys/_structs.h ./include/nrutil2.h utils.h
 Code.o: /usr/include/stdio.h /usr/include/Availability.h
 Code.o: /usr/include/AvailabilityInternal.h /usr/include/secure/_stdio.h
 Code.o: /usr/include/secure/_common.h
-lib/nrutil.o: /usr/include/stdio.h /usr/include/sys/cdefs.h
-lib/nrutil.o: /usr/include/sys/_symbol_aliasing.h
-lib/nrutil.o: /usr/include/sys/_posix_availability.h
-lib/nrutil.o: /usr/include/Availability.h /usr/include/AvailabilityInternal.h
-lib/nrutil.o: /usr/include/_types.h /usr/include/sys/_types.h
-lib/nrutil.o: /usr/include/machine/_types.h /usr/include/i386/_types.h
-lib/nrutil.o: /usr/include/secure/_stdio.h /usr/include/secure/_common.h
-lib/nrutil.o: /usr/include/stddef.h /usr/include/stdlib.h
-lib/nrutil.o: /usr/include/sys/wait.h /usr/include/sys/signal.h
-lib/nrutil.o: /usr/include/sys/appleapiopts.h /usr/include/machine/signal.h
-lib/nrutil.o: /usr/include/i386/signal.h /usr/include/i386/_structs.h
-lib/nrutil.o: /usr/include/sys/_structs.h /usr/include/sys/resource.h
-lib/nrutil.o: /usr/include/machine/endian.h /usr/include/i386/endian.h
-lib/nrutil.o: /usr/include/sys/_endian.h /usr/include/libkern/_OSByteOrder.h
-lib/nrutil.o: /usr/include/libkern/i386/_OSByteOrder.h /usr/include/alloca.h
-lib/nrutil.o: /usr/include/machine/types.h /usr/include/i386/types.h

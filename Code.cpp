@@ -6,7 +6,7 @@
 #include <fstream>
 #include <cmath>
 #include <time.h>
-#include <string>
+#include <cstring>
 #include <sstream>
 #include "solver.h"
 #include "utils.h"
