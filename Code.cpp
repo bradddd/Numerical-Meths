@@ -373,8 +373,16 @@ class FTCS_Discretization{
 			// populate C's and other constants
 			setup();
 			
-			if (!benchmark){
-		   	//generate probsize string for filename
+			int ctr = 0, ctr2 = 0;
+			
+			if (benchmark){
+				for ( long t = 0 ; t <= nsteps; t++) {
+					solve_nextT();
+				}
+			}
+			else {
+				
+				//generate probsize string for filename
 				std::stringstream out;
 				out << temp->nx << "x" << temp->ny << "x" << temp->nz ;
 				probsize = out.str();
@@ -384,31 +392,27 @@ class FTCS_Discretization{
 				// The file also relies upon the probsize string to help create a unique filename
 				std::string filename = std::string("output_FTCS_") + probsize + std::string(".bin") ;
 				std::ofstream file(filename.c_str( ), std::ios::binary);
-			}
-
-			int ctr = 0, ctr2 = 0;
-			
-			for ( long t = 0 ; t <= nsteps; t++) {
-			
-			   //calc next t
-				solve_nextT();
 				
-				//std::cout << "after solveNextT" << std::endl;
+				for ( long t = 0 ; t <= nsteps; t++) {
+				   //calc next t
+					solve_nextT();
+					
+					//std::cout << "after solveNextT" << std::endl;
 				
-				if ( ctr2++ == exportint) {
-					//std::cout << "in loop where t equals " << t << " and count equals " << ctr++ << std::endl;
-					temp->printToFile(&file);
-					ctr2=1;
-					ctr++;
+					if ( ctr2++ == exportint) {
+						//std::cout << "in loop where t equals " << t << " and count equals " << ctr++ << std::endl;
+						temp->printToFile(&file);
+						ctr2=1;
+						ctr++;
+					}
 				}
+				// this is helpful to know how many matrices to read into matlab
+				std::cout << "Number of matrices exported: " << ctr << std::endl;
+			
+				// will want to remove for benchmarking runs
+				file.close();
 			}
-			
-			// this is helpful to know how many matrices to read into matlab
-			std::cout << "Number of matrices exported: " << ctr << std::endl;
-			
-			// will want to remove for benchmarking runs
-			file.close();
-		
+				
 			time(&end);
 			return difftime(end, begin);
 			
@@ -416,7 +420,6 @@ class FTCS_Discretization{
 		
 		// take a given T and export it to a file
 		// deprecated to use Export function of MatrixT class
-
 		void exportT(std::ofstream& myFile,int slice, int time) {
 			temp->exportT(myFile,slice, time);
 		}
@@ -439,7 +442,7 @@ void FTCS_Driver() {
 		MatrixT m1(matsize[i],matsize[i],matsize[i]);
 		std::cout << "Solving a system of size: " << matsize[i] << std::endl;
 		FTCS_Discretization ft1(&m1);
-  		long long time = ft1.solve();
+  		long long time = ft1.solve(100,1,false);
 		
 		outputfile << ft1.probsize << " : " << time << "secs" << std::endl;
 	}
@@ -457,7 +460,7 @@ class Crank_Discretization{
 		* General Solution for FTCS
 		*	
 		* Tn+1(i,j,k) = T(i,j,k) + (1/2)*(( C_x*( Tn+1(i+1,j,k) + Tn+1(i-1,j,k))
-		*								+C_y*( Tn+1(i,j+1,k) + Tn+1(i,j-1,k))
+		*						+C_y*( Tn+1(i,j+1,k) + Tn+1(i,j-1,k))
 		*								+C_z*( Tn+1(i,j,k+1) + Tn+1(i,j,k-1))
 		*								-6*C_xyz*Tn+1(i,j,k)
 		*								)
@@ -501,7 +504,10 @@ class Crank_Discretization{
         solver *s;
 		
 		Crank_Discretization(MatrixT* input){
+			// calculate the size of the 2D matrix used to 
+			// represent the 3D discretization
 			n = (long)(input->nx) *(input->ny) *(input->nz); 
+
 			// allocate the matrices involved
 			A      = dmatrix(1,n,1,n);
 			A_stor = dmatrix(1,n,1,n);
@@ -511,6 +517,7 @@ class Crank_Discretization{
 			b_t = 0;
 			
 			// populate C's and other constants
+			// note: setup calls initializeA()
 			setup();
 			return;
 		}	
@@ -541,8 +548,11 @@ class Crank_Discretization{
 		void initializeA(){
 			long C1,C2,C3,C4,C5,C6,C7;
 			
+			// this allocates the block of doubles to
+			// zero where A points to
 			memset(&A[1][1],0,n*n*sizeof(double));
 			
+			// iterate through each row
 			for ( int i = 1; i < n ; i++) {
 				
 				C1=i-nx*ny;
@@ -552,6 +562,9 @@ class Crank_Discretization{
 				C5=i+1;
 				C6=i+nx;
 				C7=i+nx*ny;
+
+				// This block is a set of conditionals to determine
+				// if each constant should be set in a give row
 								
 				// main case
 				if ( i > nx*ny && i < (n-nx*ny)) {
@@ -573,11 +586,9 @@ class Crank_Discretization{
 					if(C6>0 && C6<n) A[i][C6] = -1.0*C_y/2;
 					if(C7>0 && C7<n) A[i][C7] = -1.0*C_z/2;
 				}	
-				
-			
 			}
 			
-			// Copy values of A into matrix to store
+			// Copy values of A into another matrix to store
 			memcpy( &A_stor[1][1] , &A[1][1], n*n*sizeof(double));
 			
 			return;
@@ -599,104 +610,140 @@ class Crank_Discretization{
 		// returns the time it took in seconds to solve the
 		// problem size using nsteps number of steps and 
 		// writing the matrix to file every exportint steps
-		double solve(int nsteps,int exportint) {
+		double solve(int nsteps,int exportint, bool benchmark) {
 			
 			// for benchmarking
 			time_t begin, end; 
 			time(&begin);
-			
-			// prob dimensions for filename
-			// std::stringstream out;  
-			// out << temp->nx << "x" << temp->ny << "x" << temp->nz ;
-			// probsize = out.str();
-						
-			
-			// string filename = std::string("output_CN_") + probsize + std::string(".bin") ;
-			// std::ofstream file(filename.c_str( ), std::ios::binary);
-									
+												
 			int ctr = 0, ctr2 = 0;
 			
-			// print initial gaussian
-			//temp->printToFile(&file);
-			
-			
-			for ( long t = 1 ; t <= nsteps ; t++) {
-				//calc next T 
-				std::cout << "before calc new T" << std::endl;
-				calcNextT();
-				std::cout << "after calc new T" << std::endl;
-				
-				
-				if ( ctr2++ == exportint ) {
-					//b_mat->printToFile(&file);
-					//temp->printToFile(&file);
-					ctr2=1;
+			if (benchmark){
+				for ( long t = 0 ; t <= nsteps; t++) {
+					calcNextT(benchmark);
 				}
-				
 			}
+			else {
 			
-			std::cout << "Number of Matrices Exported: " << ctr << std::endl;
+				//generate probsize string for filename
+				std::stringstream out;
+				out << temp->nx << "x" << temp->ny << "x" << temp->nz ;
+				probsize = out.str();
+				// This outputs the binary file containing matrices at given export intervals
+				// as dictated by the input paramters
+				// The file also relies upon the probsize string to help create a unique filename
+				std::string filename = std::string("output_CN_") + probsize + std::string(".bin");
+				std::ofstream file(filename.c_str( ), std::ios::binary);
 			
-			//file.close();
+				for ( long t = 0 ; t <= nsteps; t++) {
+				   //calc next t
+					calcNextT(benchmark);
+					
+					//std::cout << "after solveNextT" << std::endl;
+				
+					if ( ctr2++ == exportint) {
+						//std::cout << "in loop where t equals " << t << " and count equals " << ctr++ << std::endl;
+						temp->printToFile(&file);
+						ctr2=1;
+						ctr++;
+					}
+				}
+				// this is helpful to know how many matrices to read into matlab
+				std::cout << "Number of matrices exported: " << ctr << std::endl;
 			
+				// will want to remove for benchmarking runs
+				file.close();				
+			}
+					
 			time(&end);
 			return difftime(end, begin);				
 		}
 		
 		// generate and populate new_temp from values in temp
-		void calcNextT(){
+		// 
+		// need to implement the benchmark 
+		//
+		void calcNextT(bool benchmark){
 			
 			temp->BoundaryCondition();
 			
-			///* Code to store b vector in file
-			std::stringstream out;  
-			out << b_t++;
-			std::string t_string = out.str();
-			
-			std::string bfilename = std::string("bfile_")+t_string+std::string(".txt");
-			std::ofstream bfile(bfilename.c_str( ), std::ios::binary); 
-			
-			// recalculate b
-			double C_xyz = (C_x+C_y+C_z)/3;     // simplified average of C_x,y,z
-			for ( int _x = 1 ; _x <= nx ; _x++){
-				for ( int _y = 1 ; _y <= ny ; _y++){
-					for ( int _z = 1 ; _z <= nz ; _z++){
-												
-						b_mat->data[_x][_y][_z] = temp->data[_x][_y][_z] + (1/2)*(bhelper(_x,_y,_z)-6*C_xyz*temp->data[_x][_y][_z]);		 
-						//bfile << x << " " << y << " " << z << std::endl;
-						//bfile << b_mat->data[x][y][z] <<  std::endl;
+			if (benchmark) {
+				// recalculate b
+				double C_xyz = (C_x+C_y+C_z)/3;     // simplified average of C_x,y,z
+				for ( int _x = 1 ; _x <= nx ; _x++){
+					for ( int _y = 1 ; _y <= ny ; _y++){
+						for ( int _z = 1 ; _z <= nz ; _z++){
+													
+							b_mat->data[_x][_y][_z] = temp->data[_x][_y][_z] + (1/2)*(bhelper(_x,_y,_z)-6*C_xyz*temp->data[_x][_y][_z]);		 
+							//bfile << x << " " << y << " " << z << std::endl;
+							//bfile << b_mat->data[x][y][z] <<  std::endl;
+						}
 					}
 				}
-			}
+				
+				b =  &(b_mat->data[1][1][1]);
+				x =  &(temp->data[1][1][1]);
+							
+				// solve using the specific solver
+				s->solve(A,x,b,n);
+								
+				//reset A
+				resetA();
+			}			
+			else {
+				// Code to store b vector in file
+				// b_t is a counter variable for the filename
+				std::stringstream out;  
+				out << b_t++;
+				std::string t_string = out.str();
+				
+				std::string bfilename = std::string("bfile_")+t_string+std::string(".txt");
+				std::ofstream bfile(bfilename.c_str( ), std::ios::binary);
 			
-			b =  &(b_mat->data[1][1][1]);
 			
-			vprint(b,n,"b vector",bfile);
-			mprint(A,n,"A matrix",bfile);
-						
-			x =  &(temp->data[1][1][1]);
-			
-			vprint(x,n,"x vector before",bfile);
+				// recalculate b
+				double C_xyz = (C_x+C_y+C_z)/3;     // simplified average of C_x,y,z
+				for ( int _x = 1 ; _x <= nx ; _x++){
+					for ( int _y = 1 ; _y <= ny ; _y++){
+						for ( int _z = 1 ; _z <= nz ; _z++){
+													
+							b_mat->data[_x][_y][_z] = temp->data[_x][_y][_z] + (1/2)*(bhelper(_x,_y,_z)-6*C_xyz*temp->data[_x][_y][_z]);		 
+							//bfile << x << " " << y << " " << z << std::endl;
+							//bfile << b_mat->data[x][y][z] <<  std::endl;
+						}
+					}
+				}
+				
+				b =  &(b_mat->data[1][1][1]);
+				
+				vprint(b,n,"b vector",bfile);
+				mprint(A,n,"A matrix",bfile);
+							
+				x =  &(temp->data[1][1][1]);
+				
+				vprint(x,n,"x vector before",bfile);
 
-			std::cout << "About to upper tri" << std::endl;
-			
-            s->solve(A,x,b,n);
-			
-			bfile.close();
-			
-			//reset A
-			resetA();
-			return;
-			
+				std::cout << "About to upper tri" << std::endl;
+				
+				// solve using the specific solver
+				s->solve(A,x,b,n);
+				
+				bfile.close();
+				
+				//reset A
+				resetA();
+			}
+			return;			
 		}
 				
 		void exportT( std::ofstream& myFile,int slice, int time) {
 			temp->exportT(myFile,slice, time);
 			return;
 		} 
-		
-	
-		
+			
+		// used in recalculating the b vector
+		// takes the coords for a give point in the 3D space
+		// and determines its neighbors influence
 		double bhelper(int x, int y, int z) {
 			double val = 0;
 			if ((x+1)<=nx ) val += C_x*(temp->data[x+1][y][z]);
@@ -727,7 +774,7 @@ void CN_Driver() {
 		Crank_Discretization ft1(&m1);
         ft1.setSolver(j);
 		std::cout << "After declaring Crank " << std::endl;
-  		long long time = ft1.solve(10,1);
+  		long long time = ft1.solve(10,1,true);
 		std::cout << "After solve" << std::endl;
 		outputfile << ft1.probsize << " : " << time << "secs" << std::endl;
 	}
@@ -745,4 +792,3 @@ int main ()
 
 	return 0;
 }
-
