@@ -57,4 +57,20 @@ inline void vprint(double *vector, int m, std::string label, stream& file) {
     file << "END VECTOR" << std::endl;
 }
 
+
+template<typename T>
+inline void mcopy(T*** dest, T*** source, int xSize, int ySize, int zSize)
+{
+	for ( int i = 1 ; i < xSize; i++)
+	{
+		for ( int j = 1 ; j < ySize ; j++)
+		{
+			for ( int k = 1 ; k < zSize ; k++)
+			{
+				dest[i][j][k] = source[i][j][k];
+			}
+		}
+	}
+}
+
 #endif  // UTILS_H
