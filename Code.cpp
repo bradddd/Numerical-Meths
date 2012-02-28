@@ -623,15 +623,17 @@ void Jacobi_Driver() {
 	std::ofstream outputfile;
 	outputfile.open ("Jacobi_Benchmark.txt");
 	 
-	for ( int i = 0 ; i <= 3; i++) {
+	for ( int i = 0 ; i <= 5; i++) {
 		std::cout << "About to declare a MatrixT of size: " << matsize[i] << std::endl;
 		MatrixT m1(matsize[i],matsize[i],matsize[i]);
 		std::cout << "Solving a system of size: " << matsize[i] << std::endl;
 		Jacobi j(&m1);
 		std::cout << "After Jacobi constructor, about to solve" << std::endl;
-  		long long time = j.solve(10,1,true);
+  		long long time = j.solve(1,1,true);
 		std::cout << "After solve" << std::endl;
-		outputfile << j.probsize << " : " << time << "secs" << std::endl;
+		//outputfile << j.probsize << " : " << time << "secs" << std::endl;
+		outputfile << j.probsize << " : " << time << "iterations" << std::endl;
+		m1.deAllocateData();
 	}
 	outputfile.close();
 	
@@ -647,15 +649,17 @@ void GS_Driver() {
 	std::ofstream outputfile;
 	outputfile.open ("GS_Benchmark.txt");
 	 
-	for ( int i = 0 ; i <= 3; i++) {
+	for ( int i = 0 ; i <= 5; i++) {
 		std::cout << "About to declare a MatrixT of size: " << matsize[i] << std::endl;
 		MatrixT m1(matsize[i],matsize[i],matsize[i]);
 		std::cout << "Solving a system of size: " << matsize[i] << std::endl;
 		GaussSeidel g(&m1);
 		std::cout << "After GaussSeidel constructor, about to solve" << std::endl;
-  		long long time = g.solve(10,1,true);
+  		long long time = g.solve(1,1,true);
 		std::cout << "After solve" << std::endl;
-		outputfile << g.probsize << " : " << time << "secs" << std::endl;
+		//outputfile << g.probsize << " : " << time << "secs" << std::endl;
+		outputfile << g.probsize << " : " << time << "iterations" << std::endl;
+		m1.deAllocateData();
 	}
 	outputfile.close();
 	
@@ -670,15 +674,17 @@ void SOR_Driver() {
 	std::ofstream outputfile;
 	outputfile.open ("SOR_Benchmark.txt");
 	 
-	for ( int i = 0 ; i <= 3; i++) {
+	for ( int i = 0 ; i <= 5; i++) {
 		std::cout << "About to declare a MatrixT of size: " << matsize[i] << std::endl;
 		MatrixT m1(matsize[i],matsize[i],matsize[i]);
 		std::cout << "Solving a system of size: " << matsize[i] << std::endl;
 		SOR s(&m1);
 		std::cout << "After SOR constructor, about to solve" << std::endl;
-  		long long time = s.solve(10,1,true);
+  		long long time = s.solve(1,1,true);
 		std::cout << "After solve" << std::endl;
-		outputfile << s.probsize << " : " << time << "secs" << std::endl;
+		//outputfile << s.probsize << " : " << time << "secs" << std::endl;
+		outputfile << s.probsize << " : " << time << "iterations" << std::endl;
+		m1.deAllocateData();
 	}
 	outputfile.close();
 	

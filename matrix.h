@@ -63,7 +63,7 @@ class MatrixT{
 	}
 
 	void deAllocateData(){
-		std::cout << "trying to delete" << std::endl;
+		//std::cout << "trying to delete" << std::endl;
 		free_d3tensor(data,1,nx,1,ny,1,nz);
 	}
 

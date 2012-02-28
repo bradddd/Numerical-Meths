@@ -4,6 +4,7 @@
 #include "matrix.h"
 #include "nrutil.h"
 
+#define MAX_IT 1000
 
 class IterativeSolver
 {
@@ -59,7 +60,7 @@ class IterativeSolver
         }
 
         // iterate through
-        virtual void solve_nextT() {		
+        virtual double solve_nextT() {		
 
             //std::cout << temp->data[temp->nx/2][temp->ny/2][temp->nz/2] << C_x << " " << C_y << " " << C_z << std::endl; // output what each C is for debugging
 
@@ -83,10 +84,10 @@ class IterativeSolver
             temp = new_temp;
             new_temp = tmp;
 
-            return;			
+            return 0.0;			
         }
 
-        virtual void solve_nextT( double (*func)(int,int,int)) {		
+        virtual double solve_nextT( double (*func)(int,int,int)) {		
 
             //std::cout << temp->data[temp->nx/2][temp->ny/2][temp->nz/2] << C_x << " " << C_y << " " << C_z << std::endl;
 
@@ -110,10 +111,10 @@ class IterativeSolver
             temp = new_temp;
             new_temp = tmp;
 
-            return;			
+            return 0.0;			
         }
 
-        virtual void solve_nextT( int val) {		
+        virtual double solve_nextT( int val) {		
 
             //std::cout << temp->data[temp->nx/2][temp->ny/2][temp->nz/2] << C_x << " " << C_y << " " << C_z << std::endl;
 
@@ -137,7 +138,7 @@ class IterativeSolver
             temp = new_temp;
             new_temp = tmp;
 
-            return;			
+            return 0.0;			
         }
 
 
@@ -152,17 +153,19 @@ class IterativeSolver
         // exportint = the interval to output a matrix to file
         // benchmark = bool to disable extraneous features
         double solve(int nsteps, int exportint, bool benchmark){
-            time_t begin, end; 
-            time(&begin);
 
             // populate C's and other constants
             setup();
 
+            time_t begin, end; 
+            time(&begin);
+
             int ctr = 0, ctr2 = 0;
 
+				double num_iterations = 0;
             if (benchmark){
-                for ( long t = 0 ; t <= nsteps; t++) {
-                    solve_nextT();
+                for ( long t = 1 ; t <= nsteps; t++) {
+                    num_iterations = solve_nextT();
                 }
             }
             else {
@@ -175,7 +178,7 @@ class IterativeSolver
                 // This outputs the binary file containing matrices at given export intervals
                 // as dictated by the input paramters
                 // The file also relies upon the probsize string to help create a unique filename
-                std::string filename = std::string("output_FTCS_") + probsize + std::string(".bin") ;
+                std::string filename = std::string("output_IT_") + probsize + std::string(".bin") ;
                 std::ofstream file(filename.c_str( ), std::ios::binary);
 
                 for ( long t = 0 ; t <= nsteps; t++) {
@@ -199,7 +202,8 @@ class IterativeSolver
             }
 
             time(&end);
-            return difftime(end, begin);
+            //return difftime(end, begin);
+            return num_iterations; 
 
         }
 
@@ -213,17 +217,21 @@ class IterativeSolver
 		// norm computer
 		double norm(double*** T,double*** T_old) {
 			double sum = 0.0;
+			long long ctr = 0;
 			for ( int x = 2 ; x < temp->nx ; x++)
 			{
 				for ( int y = 2 ; y < temp->ny ; y++)
 				{
 					for ( int z = 2 ; z < temp->nz ; z++)
 					{
-						sum += pow(T[x][y][z] - T_old[x][y][z],2);
+						//sum += pow(T[x][y][z] - T_old[x][y][z],2);
+					   ctr++;
+						sum += fabs(T[x][y][z] - T_old[x][y][z]);
 					}
 				}
 			}
-			return sqrt(sum);
+		//	return sqrt(sum);
+			return sum / ((double)ctr);
 		}
 };
 
@@ -252,26 +260,29 @@ class Jacobi : public IterativeSolver
         }	
 
         // iterate through
-        void solve_nextT() 
+        double solve_nextT() 
         {	
-            solve_nextT(zeroFunc);
+            return solve_nextT(zeroFunc);
         }
 
-		void solve_nextT( double (*func)(int,int,int)) 
+		double solve_nextT( double (*func)(int,int,int)) 
 		{
 			//set temps 
 			int sx = temp-> nx;
 			int sy = temp-> ny;
 			int sz = temp-> nz;
 
-			int max_iterations = 1000;
+			int max_iterations = MAX_IT;
 			// just aliasing for readability
 			double ***T_new = new_temp->data;
 			double ***T     = temp->data;
+			double ***T_old = d3tensor(1,sx,1,sy,1,sz);
 
 			int halfX = temp->nx/2; int halfY = temp->ny/2; int halfZ = temp->nz/2;
 			printf("Sample temp (middle point)= %.6f\n", T[halfX][halfY][halfZ]);
 
+			mcopy(T_old,T,sx,sy,sz);
+			
 			while (max_iterations--) 
 			{
 				for ( int x = 2 ; x < temp->nx ; x++)
@@ -281,28 +292,30 @@ class Jacobi : public IterativeSolver
 						for ( int z = 2 ; z < temp->nz ; z++)
 						{
 							double c_term = 1/(2*C_x + 2*C_y + 2*C_z + 1);
-							//std::cout << "in loop where x,y,z" << x << "," << y << "," << z << std::endl;
-							// use sparingly as it will cause putty to crash
 
 							T_new[x][y][z] =  c_term * 
 								(C_x * T[x-1][y][z] + C_x * T[x+1][y][z] + 
 								 C_y * T[x][y-1][z] + C_y * T[x][y+1][z] +
 								 C_z * T[x][y][z-1] + C_z * T[x][y][z+1]) + 
-								c_term * T[x][y][z];
+								c_term * T_old[x][y][z];
 						}
 					}
 				}
 
 
 				// implement threshold condition
-				if ( norm(T,T_new)< 10E-6) break;
+				if ( norm(T,T_new)< 10E-8) {
+					std::cout << "Broke on iteration: " << (MAX_IT-max_iterations) << std::endl;
+					break;
+				}
 
 				mcopy(T, T_new, sx, sy, sz);
 			}
 
 			printf("Sample temp (middle point)= %.6f\n", T[halfX][halfY][halfZ]);
 
-			return;			
+			free_d3tensor(T_old,1,sx,1,sy,1,sz);
+			return MAX_IT-max_iterations;			
         }
 }; // Jacobi
 
@@ -328,27 +341,32 @@ class GaussSeidel : public IterativeSolver
         }	
 
         // iterate through
-        void solve_nextT() 
+        double solve_nextT() 
         {	
-            solve_nextT(zeroFunc);
+            return solve_nextT(zeroFunc);
         }
 
-        void solve_nextT( double (*func)(int,int,int)) 
+        double solve_nextT( double (*func)(int,int,int)) 
         {
-            int max_iterations = 1000;
-            // just aliasing for readability
-            double ***T_old = new_temp->data;
-            double ***T     = temp->data;
-
 			//set temps 
 			int sx = temp-> nx;
 			int sy = temp-> ny;
 			int sz = temp-> nz;
+			
+			int max_iterations = MAX_IT;
+            // just aliasing for readability
+            double ***T_old = new_temp->data;
+            double ***T     = temp->data;
+			   double ***T_last= d3tensor(1,sx,1,sy,1,sz);
+            
+			int halfX = temp->nx/2; int halfY = temp->ny/2; int halfZ = temp->nz/2;
+         printf("Sample temp (middle point)= %.6f\n", T[halfX][halfY][halfZ]);
 
+			mcopy(T_old,T,sx,sy,sz);
 			while (max_iterations--) 
 			{
 				//memcpy( T_old,T, sx*sy*sz*sizeof(double));
-				mcopy(T_old, T, sx, sy, sz);
+				mcopy(T_last, T, sx, sy, sz);
 				for ( int x = 2 ; x < temp->nx ; x++)
 				{
 					for ( int y = 2 ; y < temp->ny ; y++)
@@ -363,18 +381,20 @@ class GaussSeidel : public IterativeSolver
 								(C_x * T[x-1][y][z] + C_x * T[x+1][y][z] + 
 								 C_y * T[x][y-1][z] + C_y * T[x][y+1][z] +
 								 C_z * T[x][y][z-1] + C_z * T[x][y][z+1]) + 
-								c_term * T[x][y][z];
+								c_term * T_old[x][y][z];
 						}
 					}
-				}
+				  }
 				// implement threshold condition
-				if ( norm(T,T_old)< 10E-6) break;
+				if ( norm(T,T_last)< 10E-8) {
+				   std::cout << "Broke on iteration: " << (MAX_IT-max_iterations) << std::endl;
+					break;
+				}
 			}
 
-            int halfX = temp->nx/2; int halfY = temp->ny/2; int halfZ = temp->nz/2;
             printf("Sample temp (middle point)= %.6f\n", T[halfX][halfY][halfZ]);
 
-            return;			
+            return MAX_IT-max_iterations;			
         }
 
 };  // Gauss-Seidel
@@ -394,28 +414,35 @@ class SOR : public IterativeSolver
         }	
 
         // iterate through
-        void solve_nextT() 
+        double solve_nextT() 
         {	
-            solve_nextT(zeroFunc);
+            return solve_nextT(zeroFunc);
         }
 
-        void solve_nextT( double (*func)(int,int,int)) 
+        double solve_nextT( double (*func)(int,int,int)) 
         {
-            int max_iterations = 1000;
-            // just aliasing for readability
-            double ***T_old = new_temp->data;
-            double ***T     = temp->data;
-			double w		= 1.65; // TODO make a setter
-
 			//set temps 
 			int sx = temp-> nx;
 			int sy = temp-> ny;
 			int sz = temp-> nz;
 
+			int max_iterations = MAX_IT;
+         // just aliasing for readability
+         double ***T_old = new_temp->data;
+         double ***T     = temp->data;
+			double ***T_last= d3tensor(1,sx,1,sy,1,sz);
+			double w		= 1.65; // TODO make a setter
+
+
+         int halfX = temp->nx/2; int halfY = temp->ny/2; int halfZ = temp->nz/2;
+         printf("Sample temp (middle point)= %.6f\n", T[halfX][halfY][halfZ]);
+			
+			mcopy(T_old, T, sx, sy, sz);
+
 			while (max_iterations--) 
 			{
 				// copy the old
-				mcopy(T_old, T, sx, sy, sz);
+				mcopy(T_last, T, sx, sy, sz);
 				for ( int x = 2 ; x < temp->nx ; x++)
 				{
 					for ( int y = 2 ; y < temp->ny ; y++)
@@ -430,18 +457,20 @@ class SOR : public IterativeSolver
 								(C_x * T[x-1][y][z] + C_x * T[x+1][y][z] + 
 								 C_y * T[x][y-1][z] + C_y * T[x][y+1][z] +
 								 C_z * T[x][y][z-1] + C_z * T[x][y][z+1]) + 
-								w * c_term * T[x][y][z];
+								w * c_term * T_old[x][y][z];
 						}
 					}
 				}
 				// implement threshold condition
-				if ( norm(T,T_old)< 10E-6) break;
+				if ( norm(T,T_last)< 10E-8) {
+					std::cout << "Broke on iteration: " << (MAX_IT-max_iterations) << std::endl;
+					break;
+				}
 			}
 
-            int halfX = temp->nx/2; int halfY = temp->ny/2; int halfZ = temp->nz/2;
             printf("Sample temp (middle point)= %.6f\n", T[halfX][halfY][halfZ]);
 
-            return;			
+            return MAX_IT-max_iterations;			
         }
 
 };  // SOR
