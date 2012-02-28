@@ -240,7 +240,18 @@ class Jacobi : public IterativeSolver
 
         void solve_nextT( double (*func)(int,int,int)) 
         {
-            int max_iterations = 10;
+			   //set temps 
+			   int sx = temp-> nx;
+		      int sy = temp-> ny;
+			   int sz = temp-> nz;
+           
+				int max_iterations = 1000;
+            // just aliasing for readability
+            double ***T_new = new_temp->data;
+            double ***T     = temp->data;
+            
+            int halfX = temp->nx/2; int halfY = temp->ny/2; int halfZ = temp->nz/2;
+				printf("Sample temp (middle point)= %.6f\n", T[halfX][halfY][halfZ]);
 
             while (max_iterations--) 
             {
@@ -250,55 +261,138 @@ class Jacobi : public IterativeSolver
                     {
                         for ( int z = 2 ; z < temp->nz ; z++)
                         {
-                            // just aliasing for readability
-                            double ***T = new_temp->data;
-                            double ***T_old = temp->data;
-
                             double c_term = 1/(2*C_x + 2*C_y + 2*C_z + 1);
-                            //std::cout << "in loop where x,y,z" << x << "," << y << "," << z << std::endl;    // use sparingly as it will cause putty to crash
-                            T[x][y][z] =  c_term * 
+                            //std::cout << "in loop where x,y,z" << x << "," << y << "," << z << std::endl;
+									 // use sparingly as it will cause putty to crash
+
+                            T_new[x][y][z] =  c_term * 
                                 (C_x * T[x-1][y][z] + C_x * T[x+1][y][z] + 
                                  C_y * T[x][y-1][z] + C_y * T[x][y+1][z] +
                                  C_z * T[x][y][z-1] + C_z * T[x][y][z+1]) + 
-                                c_term * T_old[x][y][z];
+                                c_term * T[x][y][z];
                         }
                     }
                 }
+					 
+					 
+					 // implement threshold condition
+					 if ( norm(T,T_new)< 10E-6) break;
+					 
+					 memcpy( T,T_new, sx*sy*sz*sizeof(double));
+					 std::cout << "Right after memset" << std::endl;
+					 
             }
 
-            int halfX = temp->nx/2; int halfY = temp->ny/2; int halfZ = temp->nz/2;
-            printf("Sample temp (middle point)= %.6f\n", new_temp->data[halfX][halfY][halfZ]);
+            printf("Sample temp (middle point)= %.6f\n", T[halfX][halfY][halfZ]);
 
             return;			
         }
 
-        /*void solve_nextT( int val) {		
+		  // norm computer
+		  double norm(double*** T,double*** T_old) {
+			  double sum = 0;
+           for ( int x = 2 ; x < temp->nx ; x++)
+           {
+           	for ( int y = 2 ; y < temp->ny ; y++)
+            {
+             for ( int z = 2 ; z < temp->nz ; z++)
+             {
+				 	sum += pow(T[x][y][z] - T_old[x][y][z],2);
+				 }
+				}
+			  }
+		  	   
+		     return sqrt(sum);
+		  }
+};
 
-            //std::cout << temp->data[temp->nx/2][temp->ny/2][temp->nz/2] << C_x << " " << C_y << " " << C_z << std::endl;
+// This class contains the basic functionality and setup
+// for solving the 3d heat equation in 3 dimensions using Jacobi 	
+class GaussSeidel : public IterativeSolver
+{
+    public:
 
-            for ( int x = 2 ; x < temp->nx ; x++){
-                for ( int y = 2 ; y < temp->ny ; y++){
-                    for ( int z = 2 ; z < temp->nz ; z++){
+        /*
+         *  General Solution for FTCS
+         *
+         *  T(n+1) = T ( 1 - 2*C_x - 2*C_y - 2*C_z ) 
+         *		  + C_x(left and right)
+         *		  + C_y(top and bottom) 
+         *		  + C_z(forward and backward)
+         */
 
-                        //std::cout << "in loop where x,y,z" << x << "," << y << "," << z << std::endl;    // use sparingly as it will cause putty to crash
+        GaussSeidel(MatrixT* input) : IterativeSolver(input) 
+        {
+        }	
 
-                        new_temp->data[x][y][z] = temp->data[x][y][z] * ( 1 - 2*C_x - 2*C_y - 2*C_z )
-                            + C_x*(temp->data[x-1][y][z] + temp->data[x+1][y][z]) 
-                            + C_y*(temp->data[x][y+1][z] + temp->data[x][y-1][z]) 
-                            + C_z*(temp->data[x][y][z+1] + temp->data[x][y][z-1]) + val;
+        // iterate through
+        void solve_nextT() 
+        {	
+            solve_nextT(zeroFunc);
+        }
 
+        void solve_nextT( double (*func)(int,int,int)) 
+        {
+            int max_iterations = 1000;
+            // just aliasing for readability
+            double ***T_old = new_temp->data;
+            double ***T     = temp->data;
 
+				//set temps 
+			   int sx = temp-> nx;
+		      int sy = temp-> ny;
+			   int sz = temp-> nz;
+
+            while (max_iterations--) 
+            {
+					 memcpy( T_old,T, sx*sy*sz*sizeof(double));
+					 for ( int x = 2 ; x < temp->nx ; x++)
+                {
+                    for ( int y = 2 ; y < temp->ny ; y++)
+                    {
+                        for ( int z = 2 ; z < temp->nz ; z++)
+                        {
+
+                            double c_term = 1/(2*C_x + 2*C_y + 2*C_z + 1);
+                            //std::cout << "in loop where x,y,z" << x << "," << y << "," << z << std::endl;
+									 // use sparingly as it will cause putty to crash
+
+                            T[x][y][z] =  c_term * 
+                                (C_x * T[x-1][y][z] + C_x * T[x+1][y][z] + 
+                                 C_y * T[x][y-1][z] + C_y * T[x][y+1][z] +
+                                 C_z * T[x][y][z-1] + C_z * T[x][y][z+1]) + 
+                                c_term * T[x][y][z];
+                        }
                     }
                 }
+					 // implement threshold condition
+					 if ( norm(T,T_old)< 10E-6) break;
             }
 
-            MatrixT* tmp = temp;
-            temp = new_temp;
-            new_temp = tmp;
+            int halfX = temp->nx/2; int halfY = temp->ny/2; int halfZ = temp->nz/2;
+            printf("Sample temp (middle point)= %.6f\n", T[halfX][halfY][halfZ]);
 
             return;			
-        }*/
+        }
+
+		  // norm computer
+		  double norm(double*** T,double*** T_old) {
+			  double sum = 0;
+           for ( int x = 2 ; x < temp->nx ; x++)
+           {
+           	for ( int y = 2 ; y < temp->ny ; y++)
+            {
+             for ( int z = 2 ; z < temp->nz ; z++)
+             {
+				 	sum += pow(T[x][y][z] - T_old[x][y][z],2);
+				 }
+				}
+			  }
+		  	   
+		     return sqrt(sum);
+		  }
 };
+
 
 
 #endif // IT_SOLVER

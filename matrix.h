@@ -2,7 +2,7 @@
 #define MATRIX_H
 
 #include "nrutil.h"
-#include "util.h"
+#include "utils.h"
 
 // This is the basic class to contain the basic environment details
 // Notably, it contains the constants observed in solving the PDE
