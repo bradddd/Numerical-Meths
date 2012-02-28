@@ -209,9 +209,28 @@ class IterativeSolver
             temp->exportT(myFile,slice, time);
         }
 
+
+		// norm computer
+		double norm(double*** T,double*** T_old) {
+			double sum = 0.0;
+			for ( int x = 2 ; x < temp->nx ; x++)
+			{
+				for ( int y = 2 ; y < temp->ny ; y++)
+				{
+					for ( int z = 2 ; z < temp->nz ; z++)
+					{
+						sum += pow(T[x][y][z] - T_old[x][y][z],2);
+					}
+				}
+			}
+			return sqrt(sum);
+		}
 };
 
+
+
 double zeroFunc(int i, int j, int k) { return 0.0; }
+
 
 // This class contains the basic functionality and setup
 // for solving the 3d heat equation in 3 dimensions using Jacobi 	
@@ -278,34 +297,16 @@ class Jacobi : public IterativeSolver
 				// implement threshold condition
 				if ( norm(T,T_new)< 10E-6) break;
 
-				//memcpy( T,T_new, sx*sy*sz*sizeof(double));
 				mcopy(T, T_new, sx, sy, sz);
-				//std::cout << "Right after memset" << std::endl;
-
 			}
 
 			printf("Sample temp (middle point)= %.6f\n", T[halfX][halfY][halfZ]);
 
 			return;			
         }
+}; // Jacobi
 
-		  // norm computer
-		  double norm(double*** T,double*** T_old) {
-			  double sum = 0;
-           for ( int x = 2 ; x < temp->nx ; x++)
-           {
-           	for ( int y = 2 ; y < temp->ny ; y++)
-            {
-             for ( int z = 2 ; z < temp->nz ; z++)
-             {
-				 	sum += pow(T[x][y][z] - T_old[x][y][z],2);
-				 }
-				}
-			  }
-		  	   
-		     return sqrt(sum);
-		  }
-};
+
 
 // This class contains the basic functionality and setup
 // for solving the 3d heat equation in 3 dimensions using Jacobi 	
@@ -376,23 +377,74 @@ class GaussSeidel : public IterativeSolver
             return;			
         }
 
-		// norm computer
-		double norm(double*** T,double*** T_old) {
-			double sum = 0.0;
-			for ( int x = 2 ; x < temp->nx ; x++)
+};  // Gauss-Seidel
+
+
+// This class contains the basic functionality and setup
+// for solving the 3d heat equation in 3 dimensions using SOR 	
+class SOR : public IterativeSolver
+{
+    public:
+
+        /*
+         */
+
+        SOR(MatrixT* input) : IterativeSolver(input) 
+        {
+        }	
+
+        // iterate through
+        void solve_nextT() 
+        {	
+            solve_nextT(zeroFunc);
+        }
+
+        void solve_nextT( double (*func)(int,int,int)) 
+        {
+            int max_iterations = 1000;
+            // just aliasing for readability
+            double ***T_old = new_temp->data;
+            double ***T     = temp->data;
+			double w		= 1.65; // TODO make a setter
+
+			//set temps 
+			int sx = temp-> nx;
+			int sy = temp-> ny;
+			int sz = temp-> nz;
+
+			while (max_iterations--) 
 			{
-				for ( int y = 2 ; y < temp->ny ; y++)
+				// copy the old
+				mcopy(T_old, T, sx, sy, sz);
+				for ( int x = 2 ; x < temp->nx ; x++)
 				{
-					for ( int z = 2 ; z < temp->nz ; z++)
+					for ( int y = 2 ; y < temp->ny ; y++)
 					{
-						sum += pow(T[x][y][z] - T_old[x][y][z],2);
+						for ( int z = 2 ; z < temp->nz ; z++)
+						{
+							double c_term = 1/(2*C_x + 2*C_y + 2*C_z + 1);
+							//std::cout << "in loop where x,y,z" << x << "," << y << "," << z << std::endl;
+							// use sparingly as it will cause putty to crash
+
+							T[x][y][z] =  (1-w) * T[x][y][z] + w * c_term * 
+								(C_x * T[x-1][y][z] + C_x * T[x+1][y][z] + 
+								 C_y * T[x][y-1][z] + C_y * T[x][y+1][z] +
+								 C_z * T[x][y][z-1] + C_z * T[x][y][z+1]) + 
+								w * c_term * T[x][y][z];
+						}
 					}
 				}
+				// implement threshold condition
+				if ( norm(T,T_old)< 10E-6) break;
 			}
 
-			return sqrt(sum);
-		}
-};
+            int halfX = temp->nx/2; int halfY = temp->ny/2; int halfZ = temp->nz/2;
+            printf("Sample temp (middle point)= %.6f\n", T[halfX][halfY][halfZ]);
+
+            return;			
+        }
+
+};  // SOR
 
 
 

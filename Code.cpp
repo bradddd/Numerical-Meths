@@ -638,11 +638,60 @@ void Jacobi_Driver() {
     return;
 }
 
+void GS_Driver() {
+	
+	std::cout << "Matrix Solver" << std::endl;
 
+	int matsize[] = {5,10,20,30,40,50};
+	
+	std::ofstream outputfile;
+	outputfile.open ("GS_Benchmark.txt");
+	 
+	for ( int i = 0 ; i <= 3; i++) {
+		std::cout << "About to declare a MatrixT of size: " << matsize[i] << std::endl;
+		MatrixT m1(matsize[i],matsize[i],matsize[i]);
+		std::cout << "Solving a system of size: " << matsize[i] << std::endl;
+		GaussSeidel g(&m1);
+		std::cout << "After GaussSeidel constructor, about to solve" << std::endl;
+  		long long time = g.solve(10,1,true);
+		std::cout << "After solve" << std::endl;
+		outputfile << g.probsize << " : " << time << "secs" << std::endl;
+	}
+	outputfile.close();
+	
+    return;
+}
+
+void SOR_Driver() {
+	std::cout << "Matrix Solver" << std::endl;
+
+	int matsize[] = {5,10,20,30,40,50};
+	
+	std::ofstream outputfile;
+	outputfile.open ("SOR_Benchmark.txt");
+	 
+	for ( int i = 0 ; i <= 3; i++) {
+		std::cout << "About to declare a MatrixT of size: " << matsize[i] << std::endl;
+		MatrixT m1(matsize[i],matsize[i],matsize[i]);
+		std::cout << "Solving a system of size: " << matsize[i] << std::endl;
+		SOR s(&m1);
+		std::cout << "After SOR constructor, about to solve" << std::endl;
+  		long long time = s.solve(10,1,true);
+		std::cout << "After solve" << std::endl;
+		outputfile << s.probsize << " : " << time << "secs" << std::endl;
+	}
+	outputfile.close();
+	
+    return;
+}
 
 int main ()
 {
 	Jacobi_Driver();
+
+	GS_Driver();
+
+	SOR_Driver();
 
 	return 0;
 }
