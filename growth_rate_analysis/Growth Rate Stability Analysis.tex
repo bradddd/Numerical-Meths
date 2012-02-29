@@ -1,0 +1,1444 @@
+\documentclass[1pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\title{Growth Rates}
+\author{Brad Matthiesen & Matt Leisinger}
+\date{2/27/2012}
+\begin{document}
+  \maketitle 
+  \newpage
+  
+  \section{FTCS 2D Case}
+
+
+
+
+  \begin{align}
+\cfrac{u^{n+1}_{l,m} - u^{n}_{l,m}}{\Delta t} = \alpha[u^{n}_{l-1,m}+u^{n}_{l+1,m}+u^{n}_{l,m-1}+u^{n}_{l,m+1}-4u^{n}_{l,m}] 
+  
+
+
+
+
+
+
+
+
+u^{n+1}_{l,m} = u^{n}_{l,m} + C[u^{n}_{l-1,m}+u^{n}_{l+1,m}+u^{n}_{l,m-1}+u^{n}_{l,m+1}-4u^{n}_{l,m}] \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+u^{n} = G(t)e^{ikl\Delta x}e^{ikm\Delta x} 
+
+
+
+
+ \begin{multline}
+G(t+1)e^{ikl\Delta x}e^{ikm\Delta x}
+   \\= G(t)e^{ikl\Delta x}e^{ikm\Delta x} + C[
+    G(t)e^{ikl-1\Delta x}e^{ikm\Delta x}+
+    G(t)e^{ikl+1\Delta x}e^{ikm\Delta x}+
+    G(t)e^{ikl\Delta x}e^{ikm-1\Delta x}+
+    G(t)e^{ikl\Delta x}e^{ikm+1\Delta x}-
+    4G(t)e^{ikl\Delta x}e^{ikm\Delta x}
+      ]
+      \end{multline}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\cfrac{G(t+1)}{G(t)} = 1 +\cfrac{Ce^{ikl\Delta x}e^{ikm\Delta x}[2e^{1}+2e^{1}-4]}{e^{ikl\Delta x}e^{ikm\Delta x}} 
+\\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\cfrac{G(t+1)}{G(t)} = 1 + 2C[ e^{-ik\Delta x}+e^{ik\Delta x}-2 ]   \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\cfrac{G(t+1)}{G(t)} = 1 + 2C[ 2cos(k\Delta x)-2 ]  \\
+
+
+
+
+      \\ 
+      worst when cos is -1 so \\
+    
+    \begin{eqnarray*} 
+    
+    |1-8C|\leq 1     \\
+    -1 \leq 1-8C \leq 1 \\
+    -2 \leq -8C \leq 0 \\
+    1 \geq 4C \geq 0   \\
+    C \leq \cfrac{1}{4}    \\
+    \end{eqnarry*}
+
+
+
+
+    \end{align}  
+    
+
+
+
+
+\newpage
+    
+    \section{FTCS 3D Case}
+
+
+
+
+    \begin{equation*}
+    \cfrac{u^{n+1}_{l,m,n} - u^{n}_{l,m,n}}{\Delta t} = \alpha[u^{n}_{l-1,m,n}+u^{n}_{l+1,m,n}+u^{n}_{l,m-1,n}+u^{n}_{l,m+1,n}+u^{n}_{l,m,n-1}+u^{n}_{l,m,n+1}-6u^{n}_{l,m,n}]
+    \end{equation*}
+    
+    \begin{equation*}
+    u^{n+1}_{l,m,n} = u^{n}_{l,m,n} + C[u^{n}_{l-1,m,n}+u^{n}_{l+1,m,n}+u^{n}_{l,m-1,n}+u^{n}_{l,m+1,n}+u^{n}_{l,m,n-1}+u^{n}_{l,m,n+1}-6u^{n}_{l,m,n}] 
+    \end{equation*}
+
+
+
+
+    \begin{equation*}
+    u^{n} = G(t)e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn\Delta x}
+    \end{equation*}
+
+
+
+
+    \begin{multline*}
+    G(t+1)e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn\Delta x} 
+    \\= G(t)e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn\Delta x} + C[
+    G(t)e^{ikl-1\Delta x}e^{ikm\Delta x}e^{ikn\Delta x}+
+    G(t)e^{ikl+1\Delta x}e^{ikm\Delta x}e^{ikn\Delta x}+
+    G(t)e^{ikl\Delta x}e^{ikm-1\Delta x}e^{ikn\Delta x}+
+    G(t)e^{ikl\Delta x}e^{ikm+1\Delta x}e^{ikn\Delta x}+
+    G(t)e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn-1\Delta x}+
+    G(t)e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn+1\Delta x}-
+    6G(t)e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn\Delta x}
+    ]
+    \end{multline*}
+
+
+
+
+    \begin{equation*}
+    G(t+1)e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn\Delta x} 
+    = G(t) [
+    e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn\Delta x} + C[
+    e^{ikl-1\Delta x}e^{ikm\Delta x}e^{ikn\Delta x}+
+    e^{ikl+1\Delta x}e^{ikm\Delta x}e^{ikn\Delta x}+
+    e^{ikl\Delta x}e^{ikm-1\Delta x}e^{ikn\Delta x}+
+    e^{ikl\Delta x}e^{ikm+1\Delta x}e^{ikn\Delta x}+
+    e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn-1\Delta x}+
+    e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn+1\Delta x}-
+    6e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn\Delta x}
+    ]  ] 
+    \end{equation*}
+
+
+
+
+    \begin{equation*}
+    \cfrac{G(t+1)}{G(t)} = 
+    \cfrac{
+    e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn\Delta x} + C[
+    e^{ikl-1\Delta x}e^{ikm\Delta x}e^{ikn\Delta x}+
+    e^{ikl+1\Delta x}e^{ikm\Delta x}e^{ikn\Delta x}+
+    e^{ikl\Delta x}e^{ikm-1\Delta x}e^{ikn\Delta x}+
+    e^{ikl\Delta x}e^{ikm+1\Delta x}e^{ikn\Delta x}+
+    e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn-1\Delta x}+
+    e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn+1\Delta x}-
+    6e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn\Delta x}
+    ]  }{e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn\Delta x} }
+    \end{equation*}
+
+
+
+
+\begin{equation*}
+\cfrac{G(t+1)}{G(t)} =  
+    1 + \cfrac{C[
+    e^{ikl-1\Delta x}e^{ikm\Delta x}e^{ikn\Delta x}+
+    e^{ikl+1\Delta x}e^{ikm\Delta x}e^{ikn\Delta x}+
+    e^{ikl\Delta x}e^{ikm-1\Delta x}e^{ikn\Delta x}+
+    e^{ikl\Delta x}e^{ikm+1\Delta x}e^{ikn\Delta x}+
+    e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn-1\Delta x}+
+    e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn+1\Delta x}-
+    6e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn\Delta x}
+    ]  }{e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn\Delta x} } 
+\end{equation*}
+
+
+
+
+
+
+
+
+    \begin{equation*}
+    \cfrac{G(t+1)}{G(t)} = 1 + \cfrac{Ce^{ikl\Delta x}e^{ikm\Delta x}e^{ikn\Delta x}[3e^{1}+3e^{1}-6]  }{e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn\Delta x} } 
+    \end{equation*}
+
+
+
+
+
+
+
+
+    
+    \begin{equation*}
+    \cfrac{G(t+1)}{G(t)} = 1 + 3C[ e^{-ik\Delta x}+e^{ik\Delta x}-2 ] 
+    \end{equation*}
+
+
+
+
+
+
+
+
+
+
+
+
+    \begin{equation*}
+    \cfrac{G(t+1)}{G(t)} = 1 + 3C[ 2cos(k\Delta x)-2 ]
+    \end{equation*}
+
+
+
+
+    worst when cos is -1 so \\
+    
+    \begin{eqnarray*}
+    |1-12C|\leq 1     \\
+    -1 \leq 1-12C \leq 1 \\
+    -2 \leq -12C \leq 0 \\
+    1 \geq 6C \geq 0   \\
+    C \leq \cfrac{1}{6}    \\
+    \end{eqnarray*}
+    
+   
+
+
+
+
+
+
+
+
+ \newpage
+ 
+  \section{BECS 1D Case}
+
+
+
+
+
+
+
+
+
+
+
+
+  \begin{equation*}
+  \cfrac{u^{n+1}_{a} - u^n_{a}}{\Delta t}= \cfrac{\alpha}{\Delta x^2}[u^{n+1}_{a-1} + u^{n+1}_{a+1}-2u^{n+1}_{a}]
+  \begin{equation*}
+
+
+
+
+  \begin{equation*}
+  u^{n} = G(t)e^{ika\Delta x}
+  \end{equation*}
+
+
+
+
+  \begin{equation*}
+  G(t)e^{iklaDelta x}=G(t+1)e^{ika\Delta x}-C[G(t+1)e^{ika-1\Delta x}+G(t+1)e^{ika+1\Delta x}-2G(t+1)e^{ika\Delta x}]
+  \end{equation*}
+  
+  \begin{equation*}
+  G(t)e^{iklaDelta x}e^{ikb\Delta x}= G(t+1)[e^{ikl\Delta x}e^{ikm\Delta x} - C[e^{ika-1\Delta x}+e^{ika+1\Delta x}-2e^{ika\Delta x}]]
+  \end{equation*}
+
+
+
+
+
+
+
+
+  \begin{equation*}
+  G(t) = G(t+1)[1 - C[e^{-ik\Delta x}+e^{ik\Delta x}-2]] 
+  \end{equation*}
+  
+  
+  \begin{equation*}
+  G(t) = G(t+1)[1 - C[2cos(k\Delta x)-2]]  
+  \end{equation*}
+  
+  
+  \begin{equation*}
+  G(t) = G(t+1)[1 - C[2cos(k\Delta x)-2]]      
+  \end{equation*}
+  
+  \begin{equation*}  
+  \cfrac{G(t+1)}{G(t)} = \cfrac{1}{1 - 2C(cos(k\Delta x)-1)}  
+  \end{equation*}
+  
+  \begin{eqnarray*}
+  1 \geq  \cfrac{1}{1 - 2C(cos(k\Delta x)-1)}   \\
+  1 - 2C(cos(k\Delta x)-1) \geq 1    \\
+  1 - 2C(cos(k\Delta x)-1) \geq 1    \\
+  -2C(cos(k\Delta x)-1) \geq 0    \\
+  4C \geq 0   \\
+  C\geq 0   \\
+  \end{eqnarray*}
+
+
+
+
+
+
+
+
+\newpage
+
+
+
+
+ \section{BECS 2D Case}
+
+
+
+
+
+
+
+
+ 
+ \begin{equation*}
+ \cfrac{u^{n+1}_{a,b} - u^n_{a,b}}{\Delta t}= \cfrac{\alpha}{\Delta x^2}[u^{n+1}_{a-1,b}+u^{n+1}_{a+1,b}+u^{n+1}_{a,b-1}+u^{n+1}_{a,b+1}-4u^{n+1}_{a,b}]
+ \end{equation*}
+ 
+ 
+ \begin{equation*}
+ u^{n} = G(t)e^{ika\Delta x}e^{ikb\Delta x}e
+ \end{equation*}
+ 
+ \begin{equation*}
+ G(t)e^{iklaDelta x}e^{ikb\Delta x}= G(t+1)e^{ika\Delta x}e^{ikb\Delta x} - C[G(t+1)e^{ika-1\Delta x}e^{ikb\Delta x}+G(t+1)e^{ika+1\Delta x}e^{ikb\Delta x}+G(t+1)e^{ika\Delta x}e^{ikb-1\Delta x}+G(t+1)e^{ika\Delta x}e^{ikb+1\Delta x}-4G(t+1)e^{ika\Delta x}e^{ikb\Delta x}]
+ \end{equation*}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  \begin{equation*}
+G(t)e^{iklaDelta x}e^{ikb\Delta x}
+   = G(t+1)[
+    e^{ikl\Delta x}e^{ikm\Delta x} - C[
+      e^{ika-1\Delta x}e^{ikb\Delta x}+
+      e^{ika+1\Delta x}e^{ikb\Delta x}+
+      e^{ika\Delta x}e^{ikb-1\Delta x}+
+      e^{ika\Delta x}e^{ikb+1\Delta x}-
+      4e^{ika\Delta x}e^{ikb\Delta x}
+    ]
+      \end{equation*}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+G(t) = G(t+1)[1 - C[2e^{-ik\Delta x}+2e^{ik\Delta x}-4]]      \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+G(t) = G(t+1)[1 - C[4cos(k\Delta x)-4]]      \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+G(t) = G(t+1)[1 - C[4cos(k\Delta x)-4]]      \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\cfrac{G(t+1)}{G(t)} = \cfrac{1}{1 - C(4cos(k\Delta x)-4)}      \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1 \geq  \cfrac{1}{1 - C(4cos(k\Delta x)-4)}   \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 1 - C(4cos(k\Delta x)-4) \geq 1    \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 1 - C(4cos(k\Delta x)-4) \geq 1    \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ -C(4cos(k\Delta x)-4) \geq 0    \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+8C \geq 0   \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+C\geq 0   \\
+
+
+
+
+
+
+
+
+
+
+
+
+\newpage
+ \section{BECS 3D Case}
+
+
+
+
+
+
+
+
+
+
+
+
+ \begin{equation*}
+ \cfrac{u^{n+1}_{a,b,c} - u^n_{a,b,c}}{\Delta t} 
+ = \cfrac{\alpha}{\Delta x^2} 
+ [
+ u^{n+1}_{a-1,b,c} + u^{n+1}_{a+1,b,c}+
+ u^{n+1}_{a,b-1,c} + u^{n+1}_{a,b+1,c}+
+ u^{n+1}_{a,b,c-1} + u^{n+1}_{a,b,c+1}+
+ -6u^{n+1}_{a,b,c} 
+ ]
+ \end{equation*}
+ 
+ \\ 
+ u^{n} = G(t)e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x} \\
+ 
+ 
+ 
+ \begin{equation*}
+ G(t)e^{iklaDelta x}e^{ikb\Delta x}e^{ikc\Delta x} 
+ = G(t+1)e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn\Delta x} - C[
+ G(t+1)e^{ika-1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}+
+ G(t+1)e^{ika+1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}+
+ G(t+1)e^{ika\Delta x}e^{ikb-1\Delta x}e^{ikc\Delta x}+
+ G(t+1)e^{ika\Delta x}e^{ikb+1\Delta x}e^{ikc\Delta x}+
+ G(t+1)e^{ika\Delta x}e^{ikb\Delta x}e^{ikc-1\Delta x}+
+ G(t+1)e^{ika\Delta x}e^{ikb\Delta x}e^{ikc+1\Delta x}-
+ 6G(t+1)e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}
+ ]
+ \end{equation*}
+ 
+  \begin{equation*}
+  G(t)e^{iklaDelta x}e^{ikb\Delta x}e^{ikc\Delta x} 
+  = G(t+1)[
+  e^{ikl\Delta x}e^{ikm\Delta x}e^{ikn\Delta x} - C[
+  e^{ika-1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}+
+  e^{ika+1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}+
+  e^{ika\Delta x}e^{ikb-1\Delta x}e^{ikc\Delta x}+
+  e^{ika\Delta x}e^{ikb+1\Delta x}e^{ikc\Delta x}+
+  e^{ika\Delta x}e^{ikb\Delta x}e^{ikc-1\Delta x}+
+  e^{ika\Delta x}e^{ikb\Delta x}e^{ikc+1\Delta x}-
+  6e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}
+  ]]
+  \end{equation*}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+G(t) = G(t+1)[1 - C[e^{-ik\Delta x}+e^{ik\Delta x}-6]]      \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+G(t) = G(t+1)[1 - C[2cos(k\Delta x)-6]]      \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+G(t) = G(t+1)[1 - C[2cos(k\Delta x)-6]]      \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\cfrac{G(t+1)}{G(t)} = \cfrac{1}{1 - C(2cos(k\Delta x)-6)}      \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1 \geq  \cfrac{1}{1 - C(2cos(k\Delta x)-6)}   \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 1 - C(2cos(k\Delta x)-6) \geq 1    \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 1 - C(2cos(k\Delta x)-6) \geq 1    \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ -C(2cos(k\Delta x)-6) \geq 0    \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+8C \geq 0   \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+C\geq 0   \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ \newpage
+ \section{CN 1D Case}
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{equation*}
+\cfrac{u^{n+1}_{a} - u^n_{a}}{\Delta t}=\cfrac{\alpha}{2\Delta x^2}[u^{n+1}_{a-1}+u^{n+1}_{a+1}-2u^{n+1}_{a}+u^{n}_{a-1}+u^{n}_{a+1}-2u^{n}_{a}]   
+\end{equation*}
+ 
+\begin{equation*} 
+u^{n} = G(t)e^{ika\Delta x}
+\end{equation*} 
+ 
+\begin{equation*} 
+ G(t+1)e^{ika\Delta x}- G(t)e^{ika\Delta x}=\cfrac{C}{2}G(t+1)[e^{ika-1\Delta x}+e^{ika+1\Delta x}-2e^{ika\Delta x}+ \cfrac{C}{2} G(t)[e^{ika-1\Delta x}+e^{ika+1\Delta x}-2e^{ika\Delta x}]
+\end{equation*}
+
+
+
+
+
+
+
+
+
+
+
+
+     \begin{equation*}
+     G(t+1)[e^{ika\Delta x} - \cfrac{C}{2}[e^{ika-1\Delta x}+e^{ika+1\Delta x}-2e^{ika\Delta x}]]= 
+     + G(t)[\cfrac{C}{2}[e^{ika-1\Delta x}+e^{ika+1\Delta x}-2e^{ika\Delta x}]+ e^{ika\Delta x}]
+     \end{equation*}
+     
+     \begin{equation*}
+     \cfrac{G(t+1)}{G(t)}= \cfrac{[\cfrac{C}{2}[e^{ika-1\Delta x}+e^{ika+1\Delta x}-2e^{ika\Delta x}]+ e^{ika\Delta x}]}{[e^{ika\Delta x} - \cfrac{C}{2}[e^{ika-1\Delta x}+e^{ika+1\Delta x}-2e^{ika\Delta x}]]}
+     \end{equation*}
+
+
+
+
+
+
+\begin{equation*} 
+\cfrac{G(t+1)}{G(t)} = \cfrac{[ \cfrac{C}{2}   [ e^{-ik\Delta x}+e^{ik\Delta x} -2 ] + 1 ]}
+  {   1 - \cfrac{C}{2} [e^{-ik\Delta x}+e^{ik\Delta x}-2]}
+\end{equation*} 
+
+
+\begin{equation*}
+\cfrac{G(t+1)}{G(t)} = \cfrac{[ C[cos(k\Delta x)-1 ] + 1 ]}{ 1 - C[cos(k\Delta x)-1]}
+\end{equation*}
+    
+\begin{eqnarray*}
+\cfrac{G(t+1)}{G(t)} = \cfrac{1-2C}{1+2C}
+\\
+1 \geq \cfrac{1-2C}{1+2C}
+\\
+1+2C \geq 1-2C
+\\
+4C \geq 0
+\\
+C \geq 0
+\\
+\end{eqnarray*}
+
+
+
+
+
+
+
+
+
+
+\newpage
+   \section{CN 2D Case}
+
+
+
+
+
+
+
+
+   \begin{equation*} 
+   \cfrac{u^{n+1}_{a,b} - u^n_{a,b}}{\Delta t} 
+   = \cfrac{\alpha}{2\Delta x^2}[u^{n+1}_{a-1,b} + u^{n+1}_{a+1,b}+
+   u^{n+1}_{a,b-1} + u^{n+1}_{a,b+1}-4u^{n+1}_{a,b}+u^{n}_{a-1,b} + u^{n}_{a+1,b}+ u^{n}_{a,b-1}+u^{n}_{a,b+1}-4u^{n}_{a,b}] 
+   \end{equation*}
+
+
+   \begin{equation*} 
+   u^{n} = G(t)e^{ika\Delta x}e^{ikb\Delta x}
+   \end{equation*}
+   
+   
+   \begin{equation*} 
+   G(t+1)e^{ika\Delta x}e^{ikb\Delta x}- G(t)e^{ika\Delta x}e^{ikb\Delta x}
+   = 
+   \cfrac{C}{2} 
+   G(t+1)[e^{ika-1\Delta x}e^{ikb\Delta x}
+   +e^{ika+1\Delta x}e^{ikb\Delta x}    
+   +e^{ika\Delta x}e^{ikb-1\Delta x}
+   +e^{ika\Delta x}e^{ikb+1\Delta x}
+   -4e^{ika\Delta x}e^{ikb\Delta x}
+   + \cfrac{C}{2} G(t) [e^{ika-1\Delta x}e^{ikb\Delta x}
+   +e^{ika+1\Delta x}e^{ikb\Delta x}    
+   +e^{ika\Delta x}e^{ikb-1\Delta x}
+   +e^{ika\Delta x}e^{ikb+1\Delta x}
+   -4e^{ika\Delta x}e^{ikb\Delta x}]
+   \end{equation*}    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{equation*} 
+G(t+1)[e^{ika\Delta x}e^{ikb\Delta x} - \cfrac{C}{2} 
+    [e^{ika-1\Delta x}e^{ikb\Delta x}
+    +e^{ika+1\Delta x}e^{ikb\Delta x}    
+    +e^{ika\Delta x}e^{ikb-1\Delta x}
+    +e^{ika\Delta x}e^{ikb+1\Delta x}
+    -4e^{ika\Delta x}e^{ikb\Delta x}]]=+ G(t)[\cfrac{C}{2} 
+    [e^{ika-1\Delta x}e^{ikb\Delta x}
+    +e^{ika+1\Delta x}e^{ikb\Delta x}    
+    +e^{ika\Delta x}e^{ikb-1\Delta x}
+    +e^{ika\Delta x}e^{ikb+1\Delta x}
+    -4e^{ika\Delta x}e^{ikb\Delta x}]+ e^{ika\Delta x}e^{ikb\Delta x}]
+  \end{equation*} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{equation*} 
+\cfrac{G(t+1)}{G(t)}
+  = \cfrac{[\cfrac{C}{2} 
+    [e^{ika-1\Delta x}e^{ikb\Delta x}
+    +e^{ika+1\Delta x}e^{ikb\Delta x}    
+    +e^{ika\Delta x}e^{ikb-1\Delta x}
+    +e^{ika\Delta x}e^{ikb+1\Delta x}
+    -4e^{ika\Delta x}e^{ikb\Delta x}]
+  + e^{ika\Delta x}e^{ikb\Delta x}]}{[e^{ika\Delta x}e^{ikb\Delta x} - \cfrac{C}{2}   
+    [e^{ika-1\Delta x}e^{ikb\Delta x}
+    +e^{ika+1\Delta x}e^{ikb\Delta x}    
+    +e^{ika\Delta x}e^{ikb-1\Delta x}
+    +e^{ika\Delta x}e^{ikb+1\Delta x}
+    -4e^{ika\Delta x}e^{ikb\Delta x}]]}
+   \end{equation*} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\cfrac{G(t+1)}{G(t)} = \cfrac{[ \cfrac{C}{2}   [ 2e^{-ik\Delta x}+2e^{ik\Delta x} -4 ] + 1 ]}
+  {   1 - \cfrac{C}{2} [2e^{-ik\Delta x}+2e^{ik\Delta x}-4]}
+   \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\cfrac{G(t+1)}{G(t)} = \cfrac{[ C[ e^{-ik\Delta x}+e^{ik\Delta x} -2 ] + 1 ]}
+  {   1 - C[e^{-ik\Delta x}+e^{ik\Delta x}-2]}
+   \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\cfrac{G(t+1)}{G(t)} = \cfrac{[ 2C[cos(k\Delta x)-1 ] + 1 ]}
+  {   1 - 2C[cos(k\Delta x)-1]}
+   \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\cfrac{G(t+1)}{G(t)} = \cfrac{1-4C}{1+4C}
+   \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1 \geq \cfrac{1-4C}{1+4C}
+\\
+1+4C \geq 1-4C
+\\
+8C \geq 0
+\\
+C \geq 0
+\\
+
+
+
+
+
+
+
+
+
+
+
+
+\newpage
+   \section{CN 3D Case}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   \begin{equation*} 
+   \cfrac{u^{n+1}_{a,b,c} - u^n_{a,b,c}}{\Delta t}=\cfrac{\alpha}{2\Delta x^2} 
+   [u^{n+1}_{a-1,b,c} + u^{n+1}_{a+1,b,c}+
+   u^{n+1}_{a,b-1,c} + u^{n+1}_{a,b+1,c}+
+   u^{n+1}_{a,b,c-1} + u^{n+1}_{a,b,c+1}+
+   -6u^{n+1}_{a,b,c} 
+   +u^{n}_{a-1,b,c} + u^{n}_{a+1,b,c}+
+   u^{n}_{a,b-1,c} + u^{n}_{a,b+1,c}+
+   u^{n}_{a,b,c-1} + u^{n}_{a,b,c+1}+
+   -6u^{n}_{a,b,c}]
+   \end{equation*} 
+
+
+   \begin{equation*} 
+   u^{n} = G(t)e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}
+   \end{equation*} 
+
+
+
+
+   \begin{equation*} 
+   G(t+1)e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x} - G(t)e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}=\cfrac{C}{2} 
+   G(t+1)[e^{ika-1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}
+   +e^{ika+1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}    
+   +e^{ika\Delta x}e^{ikb-1\Delta x}e^{ikc\Delta x}
+   +e^{ika\Delta x}e^{ikb+1\Delta x}e^{ikc\Delta x}
+   +e^{ika\Delta x}e^{ikb\Delta x}e^{ikc-1\Delta x}
+   +e^{ika\Delta x}e^{ikb\Delta x}e^{ikc+1\Delta x}
+   -6e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}]+ \cfrac{C}{2} 
+   G(t)[ e^{ika-1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}
+   +e^{ika+1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}    
+   +e^{ika\Delta x}e^{ikb-1\Delta x}e^{ikc\Delta x}
+   +e^{ika\Delta x}e^{ikb+1\Delta x}e^{ikc\Delta x}
+   +e^{ika\Delta x}e^{ikb\Delta x}e^{ikc-1\Delta x}
+   +e^{ika\Delta x}e^{ikb\Delta x}e^{ikc+1\Delta x}
+   -6e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}]
+   \end{equation*} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{equation*} 
+G(t+1)e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x} - \cfrac{C}{2} 
+  G(t+1)[e^{ika-1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}
+    +e^{ika+1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}    
+    +e^{ika\Delta x}e^{ikb-1\Delta x}e^{ikc\Delta x}
+    +e^{ika\Delta x}e^{ikb+1\Delta x}e^{ikc\Delta x}
+    +e^{ika\Delta x}e^{ikb\Delta x}e^{ikc-1\Delta x}
+    +e^{ika\Delta x}e^{ikb\Delta x}e^{ikc+1\Delta x}
+    -6e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}]=+ \cfrac{C}{2} 
+    G(t)[e^{ika-1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}
+    +e^{ika+1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}    
+    +e^{ika\Delta x}e^{ikb-1\Delta x}e^{ikc\Delta x}
+    +e^{ika\Delta x}e^{ikb+1\Delta x}e^{ikc\Delta x}
+    +e^{ika\Delta x}e^{ikb\Delta x}e^{ikc-1\Delta x}
+    +e^{ika\Delta x}e^{ikb\Delta x}e^{ikc+1\Delta x}
+    -6e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}]+ G(t)e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x} 
+   \end{equation*}
+
+
+
+
+\begin{equation*} 
+G(t+1)[e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x} - \cfrac{C}{2} [e^{ika-1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}
+    +e^{ika+1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}    
+    +e^{ika\Delta x}e^{ikb-1\Delta x}e^{ikc\Delta x}
+    +e^{ika\Delta x}e^{ikb+1\Delta x}e^{ikc\Delta x}
+    +e^{ika\Delta x}e^{ikb\Delta x}e^{ikc-1\Delta x}
+    +e^{ika\Delta x}e^{ikb\Delta x}e^{ikc+1\Delta x}
+    -6e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}]]=+ G(t)[\cfrac{C}{2}[ e^{ika-1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}
+    +e^{ika+1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}    
+    +e^{ika\Delta x}e^{ikb-1\Delta x}e^{ikc\Delta x}
+    +e^{ika\Delta x}e^{ikb+1\Delta x}e^{ikc\Delta x}
+    +e^{ika\Delta x}e^{ikb\Delta x}e^{ikc-1\Delta x}
+    +e^{ika\Delta x}e^{ikb\Delta x}e^{ikc+1\Delta x}
+    -6e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}]+ e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}]
+    \end{equation*} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{equation*} 
+\cfrac{G(t+1)}{G(t)}= \cfrac{[\cfrac{C}{2} [e^{ika-1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}
+    +e^{ika+1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}    
+    +e^{ika\Delta x}e^{ikb-1\Delta x}e^{ikc\Delta x}
+    +e^{ika\Delta x}e^{ikb+1\Delta x}e^{ikc\Delta x}
+    +e^{ika\Delta x}e^{ikb\Delta x}e^{ikc-1\Delta x}
+    +e^{ika\Delta x}e^{ikb\Delta x}e^{ikc+1\Delta x}
+    -6e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}]+ e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}]}{[e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x} - \cfrac{C}{2}[e^{ika-1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}
+    +e^{ika+1\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}    
+    +e^{ika\Delta x}e^{ikb-1\Delta x}e^{ikc\Delta x}
+    +e^{ika\Delta x}e^{ikb+1\Delta x}e^{ikc\Delta x}
+    +e^{ika\Delta x}e^{ikb\Delta x}e^{ikc-1\Delta x}
+    +e^{ika\Delta x}e^{ikb\Delta x}e^{ikc+1\Delta x}
+    -6e^{ika\Delta x}e^{ikb\Delta x}e^{ikc\Delta x}]]}
+   \end{equation*} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\cfrac{G(t+1)}{G(t)} = \cfrac{[ \cfrac{C}{2}   [ 3e^{-ik\Delta x}+3e^{ik\Delta x} -6 ] + 1 ]}
+  {   1 - \cfrac{C}{2} [3e^{-ik\Delta x}+3e^{ik\Delta x}-6]}
+   \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\cfrac{G(t+1)}{G(t)} = \cfrac{[ \cfrac{3C}{2} [ e^{-ik\Delta x}+e^{ik\Delta x} -2 ] + 1 ]}
+  {   1 - \cfrac{3C}{2}[e^{-ik\Delta x}+e^{ik\Delta x}-2]}
+   \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\cfrac{G(t+1)}{G(t)} = \cfrac{[ 3C[cos(k\Delta x)-1 ] + 1 ]}
+  {   1 - 3C[cos(k\Delta x)-1]}
+   \\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\cfrac{G(t+1)}{G(t)} = \cfrac{1-6C}{1+6C}
+   \\
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{eqnarray*} 
+1 \geq \cfrac{1-6C}{1+6C}
+\\
+1+6C \geq 1-6C
+\\
+12C \geq 0
+\\
+C \geq 0
+   \end{eqnarray*}
+   \end{align}
+\end{document}

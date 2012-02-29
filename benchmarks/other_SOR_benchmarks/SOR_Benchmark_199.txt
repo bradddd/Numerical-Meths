@@ -1,0 +1,11 @@
+ : 860iterations
+ : 812iterations
+ : 755iterations
+ : 688iterations
+ : 599iterations
+ : 698iterations
+ : 734iterations
+ : 741iterations
+ : 733iterations
+ : 727iterations
+ : 710iterations

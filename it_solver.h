@@ -55,6 +55,11 @@ class IterativeSolver
             new_temp = new MatrixT(temp->nx,temp->ny,temp->nz);
 
             //std::cout << "declared new_temp" << std::endl; // used to mark where in code
+                
+				//generate probsize string for filename
+            std::stringstream out;
+            out << temp->nx << "x" << temp->ny << "x" << temp->nz ;
+            probsize = out.str();
 
             return;
         }
@@ -170,10 +175,6 @@ class IterativeSolver
             }
             else {
 
-                //generate probsize string for filename
-                std::stringstream out;
-                out << temp->nx << "x" << temp->ny << "x" << temp->nz ;
-                probsize = out.str();
 
                 // This outputs the binary file containing matrices at given export intervals
                 // as dictated by the input paramters
@@ -404,7 +405,9 @@ class GaussSeidel : public IterativeSolver
 // for solving the 3d heat equation in 3 dimensions using SOR 	
 class SOR : public IterativeSolver
 {
-    public:
+	double omega;
+
+	public:
 
         /*
          */
@@ -412,6 +415,11 @@ class SOR : public IterativeSolver
         SOR(MatrixT* input) : IterativeSolver(input) 
         {
         }	
+		  
+		  double setOmega(double val) {
+				return omega = val;
+		  }
+
 
         // iterate through
         double solve_nextT() 
@@ -431,7 +439,8 @@ class SOR : public IterativeSolver
          double ***T_old = new_temp->data;
          double ***T     = temp->data;
 			double ***T_last= d3tensor(1,sx,1,sy,1,sz);
-			double w		= 1.65; // TODO make a setter
+			
+			double w		= omega; 
 
 
          int halfX = temp->nx/2; int halfY = temp->ny/2; int halfZ = temp->nz/2;

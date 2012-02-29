@@ -618,12 +618,13 @@ void CN_Driver() {
 void Jacobi_Driver() {
 	std::cout << "Matrix Solver" << std::endl;
 
-	int matsize[] = {5,10,20,30,40,50};
+	//int matsize[] = {5,10,20,30,40,50,75,100,150,200,250};
+	int matsize[] = {25,50,75,100,125,150,175,200,225,250};
 	
 	std::ofstream outputfile;
 	outputfile.open ("Jacobi_Benchmark.txt");
 	 
-	for ( int i = 0 ; i <= 5; i++) {
+	for ( int i = 0 ; i < 10; i++) {
 		std::cout << "About to declare a MatrixT of size: " << matsize[i] << std::endl;
 		MatrixT m1(matsize[i],matsize[i],matsize[i]);
 		std::cout << "Solving a system of size: " << matsize[i] << std::endl;
@@ -632,7 +633,7 @@ void Jacobi_Driver() {
   		long long time = j.solve(1,1,true);
 		std::cout << "After solve" << std::endl;
 		//outputfile << j.probsize << " : " << time << "secs" << std::endl;
-		outputfile << j.probsize << " : " << time << "iterations" << std::endl;
+		outputfile << j.probsize << " : " << time << " iterations" << std::endl;
 		m1.deAllocateData();
 	}
 	outputfile.close();
@@ -644,12 +645,13 @@ void GS_Driver() {
 	
 	std::cout << "Matrix Solver" << std::endl;
 
-	int matsize[] = {5,10,20,30,40,50};
+	//int matsize[] = {5,10,20,30,40,50,75,100,150,200,250};
+	int matsize[] = {25,50,75,100,125,150,175,200,225,250};
 	
 	std::ofstream outputfile;
 	outputfile.open ("GS_Benchmark.txt");
 	 
-	for ( int i = 0 ; i <= 5; i++) {
+	for ( int i = 0 ; i < 10; i++) {
 		std::cout << "About to declare a MatrixT of size: " << matsize[i] << std::endl;
 		MatrixT m1(matsize[i],matsize[i],matsize[i]);
 		std::cout << "Solving a system of size: " << matsize[i] << std::endl;
@@ -658,7 +660,7 @@ void GS_Driver() {
   		long long time = g.solve(1,1,true);
 		std::cout << "After solve" << std::endl;
 		//outputfile << g.probsize << " : " << time << "secs" << std::endl;
-		outputfile << g.probsize << " : " << time << "iterations" << std::endl;
+		outputfile << g.probsize << " : " << time << " iterations" << std::endl;
 		m1.deAllocateData();
 	}
 	outputfile.close();
@@ -666,24 +668,28 @@ void GS_Driver() {
     return;
 }
 
-void SOR_Driver() {
+void SOR_Driver(double x) {
 	std::cout << "Matrix Solver" << std::endl;
 
-	int matsize[] = {5,10,20,30,40,50};
+	int matsize[] = {25,50,75,100,125,150,175,200,225,250};
 	
+	std::stringstream out;
+	out << "SOR_Benchmark_" << (x*100) << ".txt";
+	std::string filename = out.str();
 	std::ofstream outputfile;
-	outputfile.open ("SOR_Benchmark.txt");
+	outputfile.open (filename.c_str());
 	 
-	for ( int i = 0 ; i <= 5; i++) {
+	for ( int i = 0 ; i < 10; i++) {
 		std::cout << "About to declare a MatrixT of size: " << matsize[i] << std::endl;
 		MatrixT m1(matsize[i],matsize[i],matsize[i]);
 		std::cout << "Solving a system of size: " << matsize[i] << std::endl;
 		SOR s(&m1);
+		s.setOmega(x);
 		std::cout << "After SOR constructor, about to solve" << std::endl;
   		long long time = s.solve(1,1,true);
 		std::cout << "After solve" << std::endl;
 		//outputfile << s.probsize << " : " << time << "secs" << std::endl;
-		outputfile << s.probsize << " : " << time << "iterations" << std::endl;
+		outputfile << s.probsize << " : " << time << " iterations" << std::endl;
 		m1.deAllocateData();
 	}
 	outputfile.close();
@@ -697,7 +703,11 @@ int main ()
 
 	GS_Driver();
 
-	SOR_Driver();
+	SOR_Driver(1.15);
+	SOR_Driver(1.20);
+	SOR_Driver(1.25);
+	SOR_Driver(1.30);
+	SOR_Driver(1.35);
 
 	return 0;
 }

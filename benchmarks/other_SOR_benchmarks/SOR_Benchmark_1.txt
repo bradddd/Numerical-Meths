@@ -1,0 +1,11 @@
+ : 346iterations
+ : 283iterations
+ : 261iterations
+ : 254iterations
+ : 253iterations
+ : 255iterations
+ : 265iterations
+ : 279iterations
+ : 316iterations
+ : 355iterations
+ : 388iterations

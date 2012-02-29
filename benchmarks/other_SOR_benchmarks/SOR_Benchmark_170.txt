@@ -1,0 +1,11 @@
+ : 26iterations
+ : 24iterations
+ : 23iterations
+ : 22iterations
+ : 22iterations
+ : 21iterations
+ : 20iterations
+ : 18iterations
+ : 14iterations
+ : 12iterations
+ : 11iterations
