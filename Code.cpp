@@ -1,5 +1,9 @@
 // Brad Matthiesen
 // matthiesen@uchicago.edu
+//
+// Matt Leisinger
+// mleisinger@uchicago.edu
+//
 // Winter 2012
 
 #include <iostream>
@@ -12,13 +16,11 @@
 #include "it_solver.h"
 #include "utils.h"
 #include "matrix.h"
+#include "Timer.h"
 
 extern "C"{
 #include "nrutil.h"
 }
-
-
-
 
 
 // This class contains the basic functionality and setup
@@ -623,17 +625,21 @@ void Jacobi_Driver() {
 	
 	std::ofstream outputfile;
 	outputfile.open ("Jacobi_Benchmark.txt");
-	 
+	Timer t;
+    double elapsed = 0.0;
+
 	for ( int i = 0 ; i < 10; i++) {
 		std::cout << "About to declare a MatrixT of size: " << matsize[i] << std::endl;
 		MatrixT m1(matsize[i],matsize[i],matsize[i]);
 		std::cout << "Solving a system of size: " << matsize[i] << std::endl;
 		Jacobi j(&m1);
 		std::cout << "After Jacobi constructor, about to solve" << std::endl;
-  		long long time = j.solve(1,1,true);
+  		t.start();
+        long long time = j.solve(1,1,true);
+        elapsed = t.stop();
 		std::cout << "After solve" << std::endl;
 		//outputfile << j.probsize << " : " << time << "secs" << std::endl;
-		outputfile << j.probsize << " : " << time << " iterations" << std::endl;
+		outputfile << j.probsize << " : " << time << " iterations : " << elapsed << " usecs" << std::endl;
 		m1.deAllocateData();
 	}
 	outputfile.close();
@@ -650,6 +656,8 @@ void GS_Driver() {
 	
 	std::ofstream outputfile;
 	outputfile.open ("GS_Benchmark.txt");
+	Timer t;
+    double elapsed = 0.0;
 	 
 	for ( int i = 0 ; i < 10; i++) {
 		std::cout << "About to declare a MatrixT of size: " << matsize[i] << std::endl;
@@ -657,10 +665,12 @@ void GS_Driver() {
 		std::cout << "Solving a system of size: " << matsize[i] << std::endl;
 		GaussSeidel g(&m1);
 		std::cout << "After GaussSeidel constructor, about to solve" << std::endl;
+  		t.start();
   		long long time = g.solve(1,1,true);
+        elapsed = t.stop();
 		std::cout << "After solve" << std::endl;
 		//outputfile << g.probsize << " : " << time << "secs" << std::endl;
-		outputfile << g.probsize << " : " << time << " iterations" << std::endl;
+		outputfile << g.probsize << " : " << time << " iterations : " << elapsed << " usecs" << std::endl;
 		m1.deAllocateData();
 	}
 	outputfile.close();
@@ -678,6 +688,8 @@ void SOR_Driver(double x) {
 	std::string filename = out.str();
 	std::ofstream outputfile;
 	outputfile.open (filename.c_str());
+	Timer t;
+    double elapsed = 0.0;
 	 
 	for ( int i = 0 ; i < 10; i++) {
 		std::cout << "About to declare a MatrixT of size: " << matsize[i] << std::endl;
@@ -686,10 +698,12 @@ void SOR_Driver(double x) {
 		SOR s(&m1);
 		s.setOmega(x);
 		std::cout << "After SOR constructor, about to solve" << std::endl;
+  		t.start();
   		long long time = s.solve(1,1,true);
+        elapsed = t.stop();
 		std::cout << "After solve" << std::endl;
 		//outputfile << s.probsize << " : " << time << "secs" << std::endl;
-		outputfile << s.probsize << " : " << time << " iterations" << std::endl;
+		outputfile << s.probsize << " : " << time << " iterations : " << elapsed << " usecs" << std::endl;
 		m1.deAllocateData();
 	}
 	outputfile.close();
