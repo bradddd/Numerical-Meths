@@ -37,7 +37,7 @@ void rstrct_3d(double ***uc, double ***uf, int nc)
         for (iif=3,ic=2;ic<nc;ic++,iif+=2) {
             for (jk=3,ik=2;ik<nc;ik++,ik+=2) {
                 double halfTerm = 0.5*uf[iif][jf][jk];
-                double sixteenthTerms = 0.0625*(uf[iif+1][jf][jk]+uf[iif-1][jf][jk]
+                double sixteenthTerms = (1.0/12.0)*(uf[iif+1][jf][jk]+uf[iif-1][jf][jk]
                                                +uf[iif][jf+1][jk]+uf[iif][jf-1][jk]
                                                +uf[iif][jf][jk+1]+uf[iif][jf][jk-1]);
                 uc[ic][jc][jk]= halfTerm + sixteenthTerms;

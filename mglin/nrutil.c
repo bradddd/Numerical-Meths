@@ -215,6 +215,91 @@ float ***f3tensor(long nrl, long nrh, long ncl, long nch, long ndl, long ndh)
 	return t;
 }
 
+double ***d3tensor(long nrl, long nrh, long ncl, long nch, long ndl, long ndh)
+/* allocate a double 3tensor with range t[nrl..nrh][ncl..nch][ndl..ndh] */
+{
+	long i,j,nrow=nrh-nrl+1,ncol=nch-ncl+1,ndep=ndh-ndl+1;
+	double ***t;
+
+	/* allocate pointers to pointers to rows */
+	t=(double ***) malloc((size_t)((nrow+NR_END)*sizeof(double**)));
+	if (!t) nrerror("allocation failure 1 in d3tensor()");
+	t += NR_END;
+	t -= nrl;
+
+	/* allocate pointers to rows and set pointers to them */
+	t[nrl]=(double **) malloc((size_t)((nrow*ncol+NR_END)*sizeof(double*)));
+	if (!t[nrl]) nrerror("allocation failure 2 in d3tensor()");
+	t[nrl] += NR_END;
+	t[nrl] -= ncl;
+
+	/* allocate rows and set pointers to them */
+	t[nrl][ncl]=(double *) malloc((size_t)((nrow*ncol*ndep+NR_END)*sizeof(double)));
+	if (!t[nrl][ncl]) nrerror("allocation failure 3 in d3tensor()");
+	t[nrl][ncl] += NR_END;
+	t[nrl][ncl] -= ndl;
+
+	for(j=ncl+1;j<=nch;j++) t[nrl][j]=t[nrl][j-1]+ndep;
+	for(i=nrl+1;i<=nrh;i++) {
+		t[i]=t[i-1]+ncol;
+		t[i][ncl]=t[i-1][ncl]+ncol*ndep;
+		for(j=ncl+1;j<=nch;j++) t[i][j]=t[i][j-1]+ndep;
+	}
+
+	/* return pointer to array of pointers to rows */
+	return t;
+}
+
+double ****d4tensor(long nrl, long nrh, long ncl, long nch, long ndl, long ndh, long nel, long neh)
+/* allocate a double 4tensor with range t[nrl..nrh][ncl..nch][ndl..ndh][nel..neh] */
+{
+	long i,j,k,nrow=nrh-nrl+1,ncol=nch-ncl+1,ndep=ndh-ndl+1,ndep2=neh-nel+1;
+	double ****t;
+
+	/* allocate pointers to pointers to rows */
+	t=(double ****) malloc((size_t)((nrow+NR_END)*sizeof(double***)));
+	if (!t) nrerror("allocation failure 1 in d4tensor()");
+	t += NR_END;
+	t -= nrl;
+
+	/* allocate pointers to rows and set pointers to them */
+	t[nrl]=(double ***) malloc((size_t)((nrow*ncol+NR_END)*sizeof(double**)));
+	if (!t[nrl]) nrerror("allocation failure 2 in d4tensor()");
+	t[nrl] += NR_END;
+	t[nrl] -= ncl;
+
+	/* allocate rows and set pointers to them */
+	t[nrl][ncl]=(double **) malloc((size_t)((nrow*ncol*ndep+NR_END)*sizeof(double*)));
+	if (!t[nrl][ncl]) nrerror("allocation failure 3 in d4tensor()");
+	t[nrl][ncl] += NR_END;
+	t[nrl][ncl] -= ndl;
+	
+	/* allocate rows and set pointers to them */
+	t[nrl][ncl][ndl]=(double *) malloc((size_t)((nrow*ncol*ndep*ndep2+NR_END)*sizeof(double)));
+	if (!t[nrl][ncl][ndl]) nrerror("allocation failure 4 in d4tensor()");
+	t[nrl][ncl][ndl] += NR_END;
+	t[nrl][ncl][ndl] -= nel;
+
+   for(k=ndl+1;k<=ndh;k++) t[nrl][ncl][k]=t[nrl][ncl][k-1]+ndep2;
+   for(j=ncl+1;j<=nch;j++) {
+		t[nrl][j]=t[nrl][j-1]+ndep;
+		t[nrl][j][ndl]=t[nrl][j-1][ndl]+ndep*ndep2;
+		for(k=ndl+1;k<=ndh;k++) t[nrl][j][k]=t[nrl][j][k-1]+ndep2;}
+	for(i=nrl+1;i<=nrh;i++) {
+		t[i]=t[i-1]+ncol;
+		t[i][ncl]=t[i-1][ncl]+ncol*ndep;
+		t[i][ncl][ndl]=t[i-1][ncl][ndl]+ncol*ndep*ndep2;
+		for(k=ndl+1;k<=ndh;k++) t[i][ncl][k]=t[i][ncl][k-1]+ndep2;
+		for(j=ncl+1;j<=nch;j++) {
+		   t[i][j]=t[i][j-1]+ndep;
+		   t[i][j][ndl]=t[i][j-1][ndl]+ndep*ndep2;
+		   for(k=ndl+1;k<=ndh;k++) t[i][j][k]=t[i][j][k-1]+ndep2;}
+	}
+
+	/* return pointer to array of pointers to rows */
+	return t;
+}
+
 void free_vector(float *v, long nl, long nh)
 /* free a float vector allocated with vector() */
 {
@@ -282,6 +367,25 @@ void free_f3tensor(float ***t, long nrl, long nrh, long ncl, long nch,
 	long ndl, long ndh)
 /* free a float f3tensor allocated by f3tensor() */
 {
+	free((FREE_ARG) (t[nrl][ncl]+ndl-NR_END));
+	free((FREE_ARG) (t[nrl]+ncl-NR_END));
+	free((FREE_ARG) (t+nrl-NR_END));
+}
+
+void free_d3tensor(double ***t, long nrl, long nrh, long ncl, long nch,
+	long ndl, long ndh)
+/* free a double f3tensor allocated by f3tensor() */
+{
+	free((FREE_ARG) (t[nrl][ncl]+ndl-NR_END));
+	free((FREE_ARG) (t[nrl]+ncl-NR_END));
+	free((FREE_ARG) (t+nrl-NR_END));
+}
+
+void free_d4tensor(double ****t, long nrl, long nrh, long ncl, long nch,
+	long ndl, long ndh, long nel, long neh)
+/* free a double d4tensor allocated by d4tensor() */
+{
+   free((FREE_ARG) (t[nrl][ncl][ndl]+nel-NR_END));
 	free((FREE_ARG) (t[nrl][ncl]+ndl-NR_END));
 	free((FREE_ARG) (t[nrl]+ncl-NR_END));
 	free((FREE_ARG) (t+nrl-NR_END));
@@ -518,6 +622,94 @@ long nch,ncl,ndh,ndl,nrh,nrl;
 	return t;
 }
 
+double ***d3tensor(nrl,nrh,ncl,nch,ndl,ndh)
+long nch,ncl,ndh,ndl,nrh,nrl;
+/* allocate a double 3tensor with range t[nrl..nrh][ncl..nch][ndl..ndh] */
+{
+	long i,j,nrow=nrh-nrl+1,ncol=nch-ncl+1,ndep=ndh-ndl+1;
+	double ***t;
+
+	/* allocate pointers to pointers to rows */
+	t=(double ***) malloc((unsigned int)((nrow+NR_END)*sizeof(double**)));
+	if (!t) nrerror("allocation failure 1 in d3tensor()");
+	t += NR_END;
+	t -= nrl;
+
+	/* allocate pointers to rows and set pointers to them */
+	t[nrl]=(double **) malloc((unsigned int)((nrow*ncol+NR_END)*sizeof(double*)));
+	if (!t[nrl]) nrerror("allocation failure 2 in d3tensor()");
+	t[nrl] += NR_END;
+	t[nrl] -= ncl;
+
+	/* allocate rows and set pointers to them */
+	t[nrl][ncl]=(double *) malloc((unsigned
+	int)((nrow*ncol*ndep+NR_END)*sizeof(double)));
+	if (!t[nrl][ncl]) nrerror("allocation failure 3 in d3tensor()");
+	t[nrl][ncl] += NR_END;
+	t[nrl][ncl] -= ndl;
+
+	for(j=ncl+1;j<=nch;j++) t[nrl][j]=t[nrl][j-1]+ndep;
+	for(i=nrl+1;i<=nrh;i++) {
+		t[i]=t[i-1]+ncol;
+		t[i][ncl]=t[i-1][ncl]+ncol*ndep;
+		for(j=ncl+1;j<=nch;j++) t[i][j]=t[i][j-1]+ndep;
+	}
+
+	/* return pointer to array of pointers to rows */
+	return t;
+}
+
+double ****d4tensor(nrl,nrh,ncl,nch,ndl,ndh,nel,neh)
+long nrl,nrh,ncl,nch,ndl,ndh,nel,neh;
+/* allocate a double 4tensor with range t[nrl..nrh][ncl..nch][ndl..ndh][nel..neh] */
+{
+	long i,j,k,nrow=nrh-nrl+1,ncol=nch-ncl+1,ndep=ndh-ndl+1,ndep2=neh-nel+1;
+	double ****t;
+
+	/* allocate pointers to pointers to rows */
+	t=(double ****) malloc((unsigned int)((nrow+NR_END)*sizeof(double***)));
+	if (!t) nrerror("allocation failure 1 in d4tensor()");
+	t += NR_END;
+	t -= nrl;
+
+	/* allocate pointers to rows and set pointers to them */
+	t[nrl]=(double ***) malloc((unsigned int)((nrow*ncol+NR_END)*sizeof(double**)));
+	if (!t[nrl]) nrerror("allocation failure 2 in d4tensor()");
+	t[nrl] += NR_END;
+	t[nrl] -= ncl;
+
+	/* allocate rows and set pointers to them */
+	t[nrl][ncl]=(double **) malloc((unsigned int)((nrow*ncol*ndep+NR_END)*sizeof(double*)));
+	if (!t[nrl][ncl]) nrerror("allocation failure 3 in d4tensor()");
+	t[nrl][ncl] += NR_END;
+	t[nrl][ncl] -= ndl;
+	
+	/* allocate rows and set pointers to them */
+	t[nrl][ncl][ndl]=(double *) malloc((unsigned int)((nrow*ncol*ndep*ndep2+NR_END)*sizeof(double)));
+	if (!t[nrl][ncl][ndl]) nrerror("allocation failure 4 in d4tensor()");
+	t[nrl][ncl][ndl] += NR_END;
+	t[nrl][ncl][ndl] -= nel;
+
+   for(k=ndl+1;k<=ndh;k++) t[nrl][ncl][k]=t[nrl][ncl][k-1]+ndep2;
+   for(j=ncl+1;j<=nch;j++) {
+		t[nrl][j]=t[nrl][j-1]+ndep;
+		t[nrl][j][ndl]=t[nrl][j-1][ndl]+ndep*ndep2;
+		for(k=ndl+1;k<=ndh;k++) t[nrl][j][k]=t[nrl][j][k-1]+ndep2;}
+	for(i=nrl+1;i<=nrh;i++) {
+		t[i]=t[i-1]+ncol;
+		t[i][ncl]=t[i-1][ncl]+ncol*ndep;
+		t[i][ncl][ndl]=t[i-1][ncl][ndl]+ncol*ndep*ndep2;
+		for(k=ndl+1;k<=ndh;k++) t[i][ncl][k]=t[i][ncl][k-1]+ndep2;
+		for(j=ncl+1;j<=nch;j++) {
+		   t[i][j]=t[i][j-1]+ndep;
+		   t[i][j][ndl]=t[i][j-1][ndl]+ndep*ndep2;
+		   for(k=ndl+1;k<=ndh;k++) t[i][j][k]=t[i][j][k-1]+ndep2;}
+	}
+
+	/* return pointer to array of pointers to rows */
+	return t;
+}
+
 void free_vector(v,nl,nh)
 float *v;
 long nh,nl;
@@ -610,5 +802,27 @@ long nch,ncl,ndh,ndl,nrh,nrl;
 	free((FREE_ARG) (t[nrl]+ncl-NR_END));
 	free((FREE_ARG) (t+nrl-NR_END));
 }
+
+void free_d3tensor(t,nrl,nrh,ncl,nch,ndl,ndh)
+double ***t;
+long nch,ncl,ndh,ndl,nrh,nrl;
+/* free a double d3tensor allocated by d3tensor() */
+{
+	free((FREE_ARG) (t[nrl][ncl]+ndl-NR_END));
+	free((FREE_ARG) (t[nrl]+ncl-NR_END));
+	free((FREE_ARG) (t+nrl-NR_END));
+}
+
+void free_d4tensor(t,nrl,nrh,ncl,nch,ndl,ndh,nel,neh)
+double ****t;
+long nrl,nrh,ncl,nch,ndl,ndh,nel,neh;
+/* free a double d4tensor allocated by d4tensor() */
+{
+   	free((FREE_ARG) (t[nrl][ncl][ndl]+nel-NR_END));
+	free((FREE_ARG) (t[nrl][ncl]+ndl-NR_END));
+	free((FREE_ARG) (t[nrl]+ncl-NR_END));
+	free((FREE_ARG) (t+nrl-NR_END));
+}
+
 
 #endif /* ANSI */

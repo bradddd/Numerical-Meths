@@ -1,6 +1,11 @@
 #ifndef _NR_UTILS_H_
 #define _NR_UTILS_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/*
 static float sqrarg;
 #define SQR(a) ((sqrarg=(a)) == 0.0 ? 0.0 : sqrarg*sqrarg)
 
@@ -40,6 +45,7 @@ static int iminarg1,iminarg2;
         (iminarg1) : (iminarg2))
 
 #define SIGN(a,b) ((b) >= 0.0 ? fabs(a) : -fabs(a))
+*/
 
 #if defined(__STDC__) || defined(ANSI) || defined(NRANSI) /* ANSI */
 
@@ -56,6 +62,9 @@ float **submatrix(float **a, long oldrl, long oldrh, long oldcl, long oldch,
 	long newrl, long newcl);
 float **convert_matrix(float *a, long nrl, long nrh, long ncl, long nch);
 float ***f3tensor(long nrl, long nrh, long ncl, long nch, long ndl, long ndh);
+double ***d3tensor(long nrl, long nrh, long ncl, long nch, long ndl, long ndh);
+double ****d4tensor(long nrl, long nrh, long ncl, long nch, long ndl, long ndh,long
+nel,long neh);
 void free_vector(float *v, long nl, long nh);
 void free_ivector(int *v, long nl, long nh);
 void free_cvector(unsigned char *v, long nl, long nh);
@@ -68,6 +77,10 @@ void free_submatrix(float **b, long nrl, long nrh, long ncl, long nch);
 void free_convert_matrix(float **b, long nrl, long nrh, long ncl, long nch);
 void free_f3tensor(float ***t, long nrl, long nrh, long ncl, long nch,
 	long ndl, long ndh);
+void free_d3tensor(double ***t, long nrl, long nrh, long ncl, long nch,
+	long ndl, long ndh);
+void free_d4tensor(double ****t, long nrl, long nrh, long ncl, long nch,
+	long ndl, long ndh,long nel, long neh);
 
 #else /* ANSI */
 /* traditional - K&R */
@@ -78,6 +91,8 @@ float **matrix();
 float **submatrix();
 float **convert_matrix();
 float ***f3tensor();
+double ***d3tensor();
+double ****d4tensor();
 double *dvector();
 double **dmatrix();
 int *ivector();
@@ -95,7 +110,13 @@ void free_convert_matrix();
 void free_dmatrix();
 void free_imatrix();
 void free_f3tensor();
+void free_d3tensor();
+void free_d4tensor();
 
 #endif /* ANSI */
+
+#ifdef __cplusplus
+} 
+#endif
 
 #endif /* _NR_UTILS_H_ */
