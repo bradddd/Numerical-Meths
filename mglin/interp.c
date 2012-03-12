@@ -10,7 +10,7 @@ void interp(double ***uf, double ***uc, int nf)
 
 
   /* Do elements that are copies.*/
-	for (kc=1,kf=1;kc <= nf;kc++,kf+=2)  
+	for (kc=1,kf=1;kc <= nc;kc++,kf+=2)  
   		for (jc=1,jf=1;jc<=nc;jc++,jf+=2) 
     		for (ic=1,iif=1;ic<=nc;ic++,iif+=2)
     	 	 	uf[iif][jf][kf]=uc[ic][jc][kc];
