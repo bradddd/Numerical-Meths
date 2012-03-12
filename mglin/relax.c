@@ -7,7 +7,7 @@ void relax(double ***u, double ***rhs, int n, double C)
     double cc;
     cc = 1/(6*C+1);
 
-    int i,ipass,isw,j,jsw,k,ksw=1;
+    int i,ipass,isw,j,jsw=1,k,ksw=1;
     /* Red and black sweeps.*/
     /* jsw and isw toggle between 1 and 2 and
        determine starting row in each column
