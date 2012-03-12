@@ -1,9 +1,8 @@
 #include "mg.h"
 #include "nrutil.h"
-#include "nrutil2.h"
 #include<stdio.h>
 
-void mglin(double ***u, int n, int ncycle){
+void mglin(double ***u, int n, int ncycle, double cTerm){
 /*
   Full Multigrid Algorithm for solution of the steady state heat
   equation with forcing.  On input u[1..n][1..n] contains the
@@ -13,7 +12,7 @@ void mglin(double ***u, int n, int ncycle){
   below.) ncycle is the number of V-cycles to be used at each level.
 */
   unsigned int j,jcycle,jj,jpost,jpre,nf,ng=0,ngrid,nn;
-  double C = 1.0; // TODO set this correctly
+  double C = cTerm;
 
   /*** setup multigrid jagged arrays ***/
   double ***iu[NGMAX+1];   /* stores solution at each grid level */
