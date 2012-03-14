@@ -2,7 +2,7 @@
 #include "nrutil.h"
 #include<stdio.h>
 
-void mglin(double ***u, int n, int ncycle, double cTerm){
+void mglin(double ***u, int n, int ncycle, double cTerm,int mode, int num_pass){
 /*
   Full Multigrid Algorithm for solution of the steady state heat
   equation with forcing.  On input u[1..n][1..n] contains the
@@ -66,7 +66,7 @@ void mglin(double ***u, int n, int ncycle, double cTerm){
           nf=nn;                                  
           for (jj=j;jj>=2;jj--) {                 
               for (jpre=1;jpre<=NPRE;jpre++)  /* NPRE g-s sweeps on the finest (relatively) scale */
-                  relax(iu[jj],irhs[jj],nf,C);
+                  relax(iu[jj],irhs[jj],nf,C,mode,num_pass);
               resid(ires[jj],iu[jj],irhs[jj],nf,C); /* compute res on finest scale, store in ires */
               nf=nf/2+1;                        /* next coarsest scale */
               rstrct_3d(irhs[jj-1],ires[jj],nf);  /* restrict residuals as rhs of next coarsest scale */
@@ -78,7 +78,7 @@ void mglin(double ***u, int n, int ncycle, double cTerm){
               nf=2*nf-1;                            /* next finest scale */
               addint(iu[jj],iu[jj-1],ires[jj],nf);  /* inter error and add to previous solution guess */
               for (jpost=1;jpost<=NPOST;jpost++)    /* do NPOST g-s sweeps */
-                  relax(iu[jj],irhs[jj],nf,C);
+                  relax(iu[jj],irhs[jj],nf,C,mode,num_pass);
           }
       }
   }

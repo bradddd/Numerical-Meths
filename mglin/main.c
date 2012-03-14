@@ -4,6 +4,8 @@
 #include <math.h>
 #include <sys/time.h>
 
+#define NUMBER_SWEEPS 2
+
 typedef struct timeval time_type;
 
 void print_here()
@@ -31,7 +33,7 @@ double stop(time_type *start_time)
     return microseconds;
 }
 
-void mglin_driver(double ***f, double C, int n, int ncycle, int nsteps)
+void mglin_driver(double ***f, double C, int n, int ncycle, int nsteps, int mode, int num_steps)
 {
     print_here();
     double totalElapsed = 0.0;
@@ -41,7 +43,7 @@ void mglin_driver(double ***f, double C, int n, int ncycle, int nsteps)
     {
         //time_type t = start(t);
 
-        mglin(f,n,ncycle, C);
+        mglin(f,n,ncycle, C, mode, num_steps);
 
         printf("spike value (f[mid][mid][mid]) = %.6f\n", f[mid][mid][mid]);
 
@@ -68,7 +70,7 @@ int main(int argc, char **argv){
   double alpha = 0.001;
   double lx = 1.0;
   double dx = lx/n;
-  double C = alpha*dt/pow(dx,3);
+  double C = alpha*dt/(dx*dx*dx);
 
   //for (i=1;i<n;++i)
   //    for (j=1;j<n;++j)
@@ -80,7 +82,7 @@ int main(int argc, char **argv){
   int nteps = 100;
   printf("got here\n");
 
-  mglin_driver(f,C,n,ncycle,nteps);
+  mglin_driver(f,C,n,ncycle,nteps,1,NUMBER_SWEEPS);
 
   //mglin(f,n,ncycle);
   outfile = fopen("soln.dat", "w");
