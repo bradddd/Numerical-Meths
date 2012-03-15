@@ -61,13 +61,13 @@ int main(int argc, char **argv){
   FILE *outfile;
   double ***f;
 
-  int n=129;
+  int n=257;
   int ncycle=2;
   f = d3tensor(1,n,1,n,1,n);
   
   // setup C
-  double dt = 0.0001;
-  double alpha = 0.001;
+  double dt = 0.0005;
+  double alpha = 0.01;
   double lx = 1.0;
   double dx = lx/n;
   double C = alpha*dt/(dx*dx*dx);
