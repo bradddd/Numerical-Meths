@@ -52,7 +52,7 @@ void mglin(double ***u, int n, int ncycle, double cTerm,int mode, int num_pass){
   ngrid=ng;                       /* reset ngrid to original size */
 
   for (j=2;j<=ngrid;j++) {        /* loop over coarse to fine, starting at level 2 */
-      printf("at grid level %d\n",j);
+      //printf("at grid level %d\n",j);
       nn=2*nn-1;  // n/2+1 getting the next lvl of gridpoints
       iu[j]=d3tensor(1,nn,1,nn,1,nn);     /* setup grids for lhs,rhs, and residual */
       irhs[j]=d3tensor(1,nn,1,nn,1,nn);
