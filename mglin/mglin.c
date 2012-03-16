@@ -58,7 +58,7 @@ void mglin(double ***u, int n, int ncycle, double cTerm,int mode, int num_pass, 
       iu[j]=d3tensor(1,nn,1,nn,1,nn);     /* setup grids for lhs,rhs, and residual */
       irhs[j]=d3tensor(1,nn,1,nn,1,nn);
       ires[j]=d3tensor(1,nn,1,nn,1,nn);
-      interp(iu[j],iu[j-1],nn,0);
+      interp(iu[j],iu[j-1],nn,1);
       /* irho contains rhs except on fine grid where it is in u */
       copy(irhs[j],(j != ngrid ? irho[j] : u),nn); 
       /* v-cycle at current grid level */
