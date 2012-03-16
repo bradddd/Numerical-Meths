@@ -6,7 +6,7 @@
 void addint(double ***uf, double ***uc, double ***res, int nf);
 void copy(double ***aout, double ***ain, int n);
 void fill0(double ***u, int n);
-void interp(double ***uf, double ***uc, int nf);
+void interp(double ***uf, double ***uc, int nf, int cubic);
 void relax(double ***u, double ***rhs, int n, double C, int mode, int num_pass);
 void resid(double ***res, double ***u, double ***rhs, int n, double C);
 void rstrct(double **uc, double **uf, int nc);
