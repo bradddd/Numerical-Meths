@@ -2,7 +2,7 @@
 #include "nrutil.h"
 #include<stdio.h>
 
-void mglin(double ***u, int n, int ncycle, double cTerm,int mode, int num_pass){
+void mglin(double ***u, int n, int ncycle, double cTerm,int mode, int num_pass, int restrict_mode){
 /*
   Full Multigrid Algorithm for solution of the steady state heat
   equation with forcing.  On input u[1..n][1..n] contains the
@@ -13,6 +13,7 @@ void mglin(double ***u, int n, int ncycle, double cTerm,int mode, int num_pass){
 */
   unsigned int j,jcycle,jj,jpost,jpre,nf,ng=0,ngrid,nn;
   double C = cTerm;
+  double rm = restrict_mode;
 
   /*** setup multigrid jagged arrays ***/
   double ***iu[NGMAX+1];   /* stores solution at each grid level */
@@ -32,7 +33,7 @@ void mglin(double ***u, int n, int ncycle, double cTerm,int mode, int num_pass){
   nn=n/2+1;
   ngrid=ng-1;
   irho[ngrid]=d3tensor(1,nn,1,nn,1,nn); 
-  rstrct_3d(irho[ngrid],u,nn);/* coarsens rhs (u at this point) to irho on mesh size nn */
+  rstrct_3d(irho[ngrid],u,nn,rm);/* coarsens rhs (u at this point) to irho on mesh size nn */
   
   // change u in the main ^^^^^^^^^^^^^^
   
@@ -40,7 +41,7 @@ void mglin(double ***u, int n, int ncycle, double cTerm,int mode, int num_pass){
   while (nn > 3) { 
     nn=nn/2+1; 
     irho[--ngrid]=d3tensor(1,nn,1,nn,1,nn);
-    rstrct_3d(irho[ngrid],irho[ngrid+1],nn); 
+    rstrct_3d(irho[ngrid],irho[ngrid+1],nn,rm); 
   }
   
   /***now setup and solve coarsest level iu[1],irhs[1] ***/
@@ -69,7 +70,7 @@ void mglin(double ***u, int n, int ncycle, double cTerm,int mode, int num_pass){
                   relax(iu[jj],irhs[jj],nf,C,mode,num_pass);
               resid(ires[jj],iu[jj],irhs[jj],nf,C); /* compute res on finest scale, store in ires */
               nf=nf/2+1;                        /* next coarsest scale */
-              rstrct_3d(irhs[jj-1],ires[jj],nf);  /* restrict residuals as rhs of next coarsest scale */
+              rstrct_3d(irhs[jj-1],ires[jj],nf,rm);  /* restrict residuals as rhs of next coarsest scale */
               fill0(iu[jj-1],nf);              /* set the initial solution guess to zero */
           } 
           slvsml_3d(iu[1],irhs[1],C);                  /* solve the small problem exactly */

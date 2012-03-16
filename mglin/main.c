@@ -35,6 +35,14 @@ enum InterpType
     INTERP_VALUE
 };
 
+enum RestrictType
+{
+    RESTRICT_WEIGHTED = 1,
+    RESTRICT_DIRECT = 2,
+    RESTRICT_MAX_VALUE
+};
+
+
 const char *RelaxtionModeToString(int mode)
 {
     if (mode == 1)
@@ -64,8 +72,18 @@ const char *InterpTypeToString(int mode)
     return "UNKNOWN_INTERP_TYPE";
 }
 
+const char *RestrictTypeToString(int mode)
+{
+    if (mode == 1)
+        return "RESTRICT_WEIGHTED";
+    else if (mode == 2)
+        return "RESTRICT_DIRECT";
+    return "UNKNOWN_RESTRICT_TYPE";
+}
 
-void mglin_driver(FILE *file, double ***f, double C, int n, int ncycle, int nsteps, int mode, int num_steps)
+
+
+void mglin_driver(FILE *file, double ***f, double C, int n, int ncycle, int nsteps, int mode, int num_steps, int restrict_mode)
 {
     double totalElapsed = 0.0;
     int i;
@@ -76,7 +94,7 @@ void mglin_driver(FILE *file, double ***f, double C, int n, int ncycle, int nste
         time_type t1;
         gettimeofday(&t1, NULL);
 
-        mglin(f,n,ncycle, C, mode, num_steps);
+        mglin(f,n,ncycle, C, mode, num_steps, restrict_mode);
         //printf("spike value (f[mid][mid][mid]) = %.6f\n", f[mid][mid][mid]);
 
         double microseconds;
@@ -92,8 +110,8 @@ void mglin_driver(FILE *file, double ***f, double C, int n, int ncycle, int nste
     printf("Relax(%s) Problem size(%d) ncycles(%d) execTime=%.4f (ms/timestep)\n",
             RelaxtionModeToString(mode), n, ncycle, avgPerTimestep);
 
-    char buffer[256];
-    sprintf(buffer, "%s, %d, %d, %d\n",RelaxtionModeToString(mode),n,ncycle,avgPerTimestep );
+    char buffer[256] = {0};
+    sprintf(buffer, "%s, %d, %d, %.4f\n",RelaxtionModeToString(mode),n,ncycle,avgPerTimestep );
     fwrite(buffer, 256, 1, file);
 }
 
@@ -102,12 +120,11 @@ int main(int argc, char **argv){
   FILE *timefile;
   double ***f;
 
-  //int matrix_size[4] = {33, 65, 129, 257};
-  int matrix_size[1] = {33};
+  int matrix_size[4] = {33, 65, 129, 257};
   int ncycle=2;
   
   timefile = fopen("FMA_benchmark.csv", "w");
-  char buf[128];
+  char buf[128]={0};
   sprintf(buf, "RelaxationType, ProblemSize, Nsteps, Time(us)\n");
   fwrite(buf, 128, 1, timefile);
 
@@ -132,7 +149,7 @@ int main(int argc, char **argv){
           int nsteps = 100;
 
           printf("Running FMA (n = %d, nsteps=%d, C=%.4f\n", n, nsteps, C);
-          mglin_driver(timefile, f,C,n,ncycle,nsteps,i,NUMBER_SWEEPS);
+          mglin_driver(timefile, f,C,n,ncycle,nsteps,i,NUMBER_SWEEPS,1);
 
           outfile = fopen("soln.dat", "w");
           fwrite(&f[1][1][1],sizeof(double),n*n*n,outfile);
