@@ -711,17 +711,54 @@ void SOR_Driver(double x) {
     return;
 }
 
+
+void SOR_Spike_Driver(double x) {
+	std::cout << "Matrix Solver" << std::endl;
+
+	int matsize[] = {33, 65, 129, 257};
+	
+	std::stringstream out;
+	out << "SOR_Spike_Benchmark_" << (x*100) << ".txt";
+	std::string filename = out.str();
+	std::ofstream outputfile;
+	outputfile.open (filename.c_str());
+	Timer t;
+    double elapsed = 0.0;
+	 
+	for ( int i = 0 ; i < 10; i++) {
+		std::cout << "About to declare a MatrixT of size: " << matsize[i] << std::endl;
+		MatrixT m1(matsize[i],matsize[i],matsize[i]);
+		std::cout << "Solving a system of size: " << matsize[i] << std::endl;
+		SOR s(&m1);
+		s.setOmega(x);
+		m1.setSpike();
+		std::cout << "After SOR constructor, about to solve" << std::endl;
+  		t.start();
+  		long long time = s.solve(1,1,true);
+        elapsed = t.stop();
+		std::cout << "After solve" << std::endl;
+		//outputfile << s.probsize << " : " << time << "secs" << std::endl;
+		outputfile << s.probsize << " : " << time << " iterations : " << elapsed << " usecs" << std::endl;
+		m1.deAllocateData();
+	}
+	outputfile.close();
+	
+    return;
+}
+
+
 int main ()
 {
-	Jacobi_Driver();
+	//Jacobi_Driver();
 
-	GS_Driver();
+	//GS_Driver();
 
-	SOR_Driver(1.15);
-	SOR_Driver(1.20);
-	SOR_Driver(1.25);
-	SOR_Driver(1.30);
-	SOR_Driver(1.35);
+	//SOR_Driver(1.15);
+	//SOR_Driver(1.20);
+	//SOR_Driver(1.25);
+	//SOR_Driver(1.30);
+	//SOR_Driver(1.35);
+	SOR_Spike_Driver(1.25);
 
 	return 0;
 }

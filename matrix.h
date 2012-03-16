@@ -41,6 +41,22 @@ class MatrixT{
 
 	~MatrixT(){}
 
+	// need spike input for comparison to FMA
+	void setSpike()
+	{
+		for ( int x = 1 ; x <= nx ; x++){
+			for ( int y = 1 ; y <= ny ; y++){
+				for ( int z = 1 ; z <= nz ; z++){
+					data[x][y][z] = 0.0;
+				}
+			}
+		}
+		int halfx = nx/2;
+		int halfy = ny/2;
+		int halfz = nz/2;
+		data[halfx][halfy][halfz] = 1.0;
+	}
+
 	// This calculates the d's and C's for solving the PDE
 	void setDs(){
 		dx=l_x/nx;
